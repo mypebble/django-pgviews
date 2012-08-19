@@ -13,6 +13,9 @@ sdist
 develop-eggs
 .installed.cfg
 
+# Sphinx docs
+doc/_build
+
 # Installer logs
 pip-log.txt
 
