@@ -15,8 +15,8 @@ Planned features include:
 -  `Composite Types <http://www.postgresql.org/docs/9.1/static/rowtypes.html>`_
 -  `Views <http://www.postgresql.org/docs/9.1/static/sql-createview.html>`_
 
-Obviously this is quite a large project, but I think it would provide a
-large amount of value to Django developers.
+Obviously this is quite a large project, but I think it would provide a huge
+amount of value to Django developers.
 
 
 Why?
