@@ -61,6 +61,37 @@ You can create this view by just subclassing :class:`django_postgres.View`. In
 
         projection = ['myapp.Table.*', 'auth.User.username', 'auth.User.email']
 
+
+Primary Keys
+------------
+
+Django requires exactly one field on any relation (view, table, etc.) to be a
+primary key. By default it will add an ``id`` field to your view, and this will
+work fine if you're using a wildcard projection from another model. If not, you
+should do one of three things. Project an ``id`` field from a model with a one-to-one
+relationship::
+
+    class SimpleUser(django_postgres.View):
+        projection = ['auth.User.id', 'auth.User.username', 'auth.User.password']
+        sql = """SELECT id, username, password, FROM auth_user;"""
+
+Explicitly define a field on your view with ``primary_key=True``::
+
+    class SimpleUser(django_postgres.View):
+        projection = ['auth.User.password']
+        sql = """SELECT username, password, FROM auth_user;"""
+        # max_length doesn't matter here, but Django needs something.
+        username = models.CharField(max_length=1, primary_key=True)
+
+Or add an ``id`` column to your view's SQL query (this example uses
+`window functions <http://www.postgresql.org/docs/9.1/static/functions-window.html>`_)::
+
+    class SimpleUser(django_postgres.View):
+        projection = ['auth.User.username', 'auth.User.password']
+        sql = """SELECT username, password, row_number() OVER () AS id
+                 FROM auth_user;"""
+
+
 Migrations
 ----------
 
