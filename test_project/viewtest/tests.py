@@ -1,16 +1,45 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
+from contextlib import closing
 
-Replace this with more appropriate tests for your application.
-"""
-
+from django.contrib import auth
+from django.db import connection
 from django.test import TestCase
 
+import models
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.assertEqual(1 + 1, 2)
+
+class ViewTest(TestCase):
+
+    def test_views_have_been_created(self):
+        with closing(connection.cursor()) as cur:
+            cur.execute('''SELECT COUNT(*) FROM pg_views
+                        WHERE viewname LIKE 'viewtest_%';''')
+            count, = cur.fetchone()
+            assert count == 3
+
+    def test_wildcard_projection(self):
+        foo_user = auth.models.User.objects.create(username='foo',
+                                                   is_superuser=True)
+        foo_user.set_password('blah')
+        foo_user.save()
+
+        foo_superuser = models.Superusers.objects.get(username='foo')
+
+        assert foo_user.id == foo_superuser.id
+        assert foo_user.password == foo_superuser.password
+
+    def test_limited_projection(self):
+        foo_user = auth.models.User.objects.create(username='foo',
+                                                   is_superuser=True)
+        foo_user.set_password('blah')
+        foo_user.save()
+
+        foo_simple = models.SimpleUser.objects.get(username='foo')
+        assert foo_simple.username == foo_user.username
+        assert foo_simple.password == foo_user.password
+        assert not hasattr(foo_simple, 'date_joined')
+
+    def test_queryset_based_view(self):
+        foo_user = auth.models.User.objects.create(username='foo',
+                                                   is_staff=True)
+
+        assert models.Staffness.objects.filter(username='foo').exists()
