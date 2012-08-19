@@ -110,7 +110,9 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    # Nothing here yet.
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'viewtest',
 )
 
 # A sample logging configuration. The only tangible logging
