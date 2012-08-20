@@ -113,6 +113,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'viewtest',
+    'arraytest',
 )
 
 # A sample logging configuration. The only tangible logging
