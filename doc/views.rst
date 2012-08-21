@@ -1,3 +1,4 @@
+=====
 Views
 =====
 
@@ -7,7 +8,7 @@ views are named queries which can be accessed as if they were regular database
 tables.
 
 Quickstart
-----------
+==========
 
 Given the following view in SQL:
 
@@ -26,7 +27,7 @@ You can create this view by just subclassing :class:`django_postgres.View`. In
         sql = """SELECT * FROM myapp_table WHERE condition"""
 
 :class:`View`
--------------
+=============
 
 .. class:: django_postgres.View
 
@@ -63,7 +64,7 @@ You can create this view by just subclassing :class:`django_postgres.View`. In
 
 
 Primary Keys
-------------
+============
 
 Django requires exactly one field on any relation (view, table, etc.) to be a
 primary key. By default it will add an ``id`` field to your view, and this will
@@ -93,7 +94,7 @@ Or add an ``id`` column to your view's SQL query (this example uses
 
 
 Migrations
-----------
+==========
 
 Views play well with South migrations; just create the view using raw SQL in a
 schema migration:
