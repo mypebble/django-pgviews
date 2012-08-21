@@ -25,3 +25,17 @@ class SimpleTest(TestCase):
         results = models.BloomFilter.objects.filter(bitmap='01011010')
         assert results.count() == 1
         assert results[0].name == 'foo'
+
+
+class BitStringExpressionTest(TestCase):
+
+    def test_can_update_bitstrings_atomically(self):
+        models.BloomFilter.objects.create(name='foo')
+        models.BloomFilter.objects.create(name='bar')
+
+        models.BloomFilter.objects \
+                .filter(name='foo') \
+                .update(bitmap=B('bitmap') | Bits('0b10100101'))
+
+        assert models.BloomFilter.objects.get(name='foo').bitmap.bin == '10100101'
+        assert models.BloomFilter.objects.get(name='bar').bitmap.bin == '00000000'
