@@ -9,6 +9,7 @@ Planned features include:
 
 -  `Arrays <http://www.postgresql.org/docs/9.1/static/arrays.html>`_
 -  `Enums <http://www.postgresql.org/docs/9.1/static/datatype-enum.html>`_
+-  `Bit Strings <http://www.postgresql.org/docs/9.1/static/datatype-bit.html>`_
 -  `Constraints <http://www.postgresql.org/docs/9.1/static/ddl-constraints.html>`_
 -  `Triggers <http://www.postgresql.org/docs/9.1/static/sql-createtrigger.html>`_
 -  `Domains <http://www.postgresql.org/docs/9.1/static/sql-createdomain.html>`_
@@ -44,6 +45,7 @@ This is a WIP, so the following list may grow and change over time.
    :maxdepth: 4
 
    views
+   bitstrings
 
 
 Indices and tables
