@@ -114,6 +114,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'viewtest',
     'arraytest',
+    'bitstringtest',
 )
 
 # A sample logging configuration. The only tangible logging
