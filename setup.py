@@ -8,4 +8,7 @@ setup(
     author_email='z@zacharyvoase.com',
     license='Public Domain',
     packages=find_packages(),
+    install_requires=[
+        'bitstring',
+    ],
 )
