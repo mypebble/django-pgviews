@@ -27,15 +27,45 @@ class SimpleTest(TestCase):
         assert results[0].name == 'foo'
 
 
-class BitStringExpressionTest(TestCase):
+class BitStringExpressionUpdateTest(TestCase):
 
-    def test_can_update_bitstrings_atomically(self):
-        models.BloomFilter.objects.create(name='foo')
+    def check_update(self, initial, expression, result):
+        models.BloomFilter.objects.create(name='foo', bitmap=initial)
         models.BloomFilter.objects.create(name='bar')
 
         models.BloomFilter.objects \
                 .filter(name='foo') \
-                .update(bitmap=B('bitmap') | Bits('0b10100101'))
+                .update(bitmap=expression)
 
-        assert models.BloomFilter.objects.get(name='foo').bitmap.bin == '10100101'
+        assert models.BloomFilter.objects.get(name='foo').bitmap.bin == result
         assert models.BloomFilter.objects.get(name='bar').bitmap.bin == '00000000'
+
+    def test_or(self):
+        self.check_update('00000000',
+                          B('bitmap') | Bits('0b10100101'),
+                          '10100101')
+
+    def test_and(self):
+        self.check_update('10100101',
+                          B('bitmap') & Bits('0b11000011'),
+                          '10000001')
+
+    def test_xor(self):
+        self.check_update('10100101',
+                          B('bitmap') ^ Bits('0b11000011'),
+                          '01100110')
+
+    def test_not(self):
+        self.check_update('10100101',
+                          ~B('bitmap'),
+                          '01011010')
+
+    def test_lshift(self):
+        self.check_update('10100101',
+                          B('bitmap') << 3,
+                          '00101000')
+
+    def test_rshift(self):
+        self.check_update('10100101',
+                          B('bitmap') >> 3,
+                          '00010100')
