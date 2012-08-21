@@ -111,7 +111,7 @@ class BitStringExpression(models.expressions.F):
     ADD = '||'  # The Postgres concatenation operator.
     XOR = '#'
     LSHIFT = '<<'
-    RSHIFT = '<<'
+    RSHIFT = '>>'
     NOT = '~'
 
     def __init__(self, field, *args, **kwargs):
@@ -130,5 +130,11 @@ class BitStringExpression(models.expressions.F):
     def __rshift__(self, other):
         return self._combine(other, self.RSHIFT, False)
 
+    def _unary(self, operator):
+        # This is a total hack, but you need to combine a raw empty space with
+        # the current node, in reverse order, with the connector being the
+        # unary operator you want to apply.
+        return self._combine(ext.AsIs(''), operator, True)
+
     def __invert__(self):
-        return self._combine('', self.NOT, True)
+        return self._unary(self.NOT)
