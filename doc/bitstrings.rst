@@ -26,7 +26,7 @@ Given the following ``models.py``::
 
 You can create objects with bit strings, and update them like so::
 
-    >>> from bitstring import Bits
+    >>> from django_postgres import Bits
     >>> from models import BloomFilter
 
     >>> bloom = BloomFilter.objects.create(name='test')
@@ -116,6 +116,6 @@ Here's a short example::
   -   Bitwise AND (``&``)
   -   Bitwise OR (``|``)
   -   Bitwise XOR (``^``)
-  -   Bitwise NOT (``~``)
+  -   (Unary) bitwise NOT (``~``)
   -   Bitwise left-shift (``<<``)
   -   Bitwise right-shift (``>>``)
