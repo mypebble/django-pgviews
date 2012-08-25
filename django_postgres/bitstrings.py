@@ -63,10 +63,10 @@ class BitStringField(models.Field):
 
         if 'default' in kwargs:
             default = kwargs.pop('default')
-        elif self.max_length is not None:
-            default = '0' * self.max_length
         elif kwargs.get('null', False):
             default = None
+        elif self.max_length is not None and not self.varying:
+            default = '0' * self.max_length
         else:
             default = '0'
         kwargs['default'] = self.to_python(default)
