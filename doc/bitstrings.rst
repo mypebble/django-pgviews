@@ -86,8 +86,16 @@ Bit String Fields
   If ``varying`` is True and ``max_length`` is ``None``, a ``VARBIT`` of
   unlimited length will be created.
 
-  Other parameters (``null``, ``default`` etc.) behave in the normal way for
-  a Django field.
+  The default value of a :class:`BitStringField` is chosen as follows:
+
+  *  If a ``default`` kwarg is provided, that value is used.
+  *  Otherwise, if ``null=True``, the default value is ``None``.
+  *  Otherwise, if the field is not a ``VARBIT``, it defaults to an all-zero
+     bit string of ``max_length`` (remember, the default length is 1).
+  *  Finally, all other cases will default to a single ``0``.
+
+  All other parameters (``db_column``, ``help_text``, etc.) behave as standard
+  for a Django field.
 
 
 Bit String Expressions
