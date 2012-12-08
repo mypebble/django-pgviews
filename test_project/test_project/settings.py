@@ -113,6 +113,7 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django_nose',
+    'django_postgres',
     'viewtest',
     'arraytest',
     'bitstringtest',

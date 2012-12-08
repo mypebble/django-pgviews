@@ -66,7 +66,7 @@ def create_views(sender, *args, **kwargs):
             cursor.execute(query)
         finally:
             cursor.close()
-models.signals.post_syncdb.connect(create_views)
+#models.signals.post_syncdb.connect(create_views)
 
 
 def get_fields_by_name(model_cls, *field_names):
