@@ -1,6 +1,7 @@
 from contextlib import closing
 
 from django.contrib import auth
+from django.core.management import call_command
 from django.db import connection
 from django.test import TestCase
 
@@ -8,6 +9,9 @@ import models
 
 
 class ViewTest(TestCase):
+
+    def setUp(self):
+        call_command('sync_pgviews', *[], **{})
 
     def test_views_have_been_created(self):
         with closing(connection.cursor()) as cur:
