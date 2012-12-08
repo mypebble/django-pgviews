@@ -51,9 +51,8 @@ def realize_deferred_projections(sender, *args, **kwargs):
 models.signals.class_prepared.connect(realize_deferred_projections)
 
 
-def create_views(sender, *args, **kwargs):
+def create_views(models_module, *args, **kwargs):
     """Create the database views after syncdb."""
-    models_module = sender
     for name, view_cls in vars(models_module).iteritems():
         if not (isinstance(view_cls, type) and
                 issubclass(view_cls, View) and
