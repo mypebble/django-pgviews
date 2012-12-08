@@ -12,4 +12,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Run the create_views command.
         """
+        self.stdout.write('Creating Views')
         create_views()
