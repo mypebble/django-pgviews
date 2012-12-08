@@ -107,3 +107,5 @@ CREATE TABLE myapp_customer (
 CREATE VIEW myapp_preferredcustomer AS
 SELECT * FROM myapp_customer WHERE is_preferred = TRUE;
 ```
+
+To create all your views, run ``python manage.py sync_pgviews``

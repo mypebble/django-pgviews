@@ -4,7 +4,7 @@ import collections
 import copy
 import re
 
-from django.db import connection
+from django.db import connection, transaction
 from django.db import models
 
 
@@ -51,22 +51,26 @@ def realize_deferred_projections(sender, *args, **kwargs):
 models.signals.class_prepared.connect(realize_deferred_projections)
 
 
-def create_views(sender, *args, **kwargs):
+def create_views(models_module, *args, **kwargs):
     """Create the database views after syncdb."""
-    models_module = sender
     for name, view_cls in vars(models_module).iteritems():
         if not (isinstance(view_cls, type) and
                 issubclass(view_cls, View) and
                 hasattr(view_cls, 'sql')):
             continue
-        query = "CREATE OR REPLACE VIEW %s AS %s;" % (view_cls._meta.db_table,
-                                                      view_cls.sql)
+
+        query = 'CREATE OR REPLACE VIEW {table} AS {select};'
+
+        query = query.format(
+            table=view_cls._meta.db_table,
+            select=view_cls.sql)
+
         cursor = connection.cursor()
         try:
             cursor.execute(query)
+            transaction.commit_unless_managed()
         finally:
             cursor.close()
-models.signals.post_syncdb.connect(create_views)
 
 
 def get_fields_by_name(model_cls, *field_names):
