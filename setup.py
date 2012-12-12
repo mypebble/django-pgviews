@@ -10,5 +10,6 @@ setup(
     packages=find_packages(),
     install_requires=[
         'bitstring',
+        'Django>=1.3',
     ],
 )
