@@ -1,12 +1,12 @@
 """Synchronise SQL Views.
 """
-from django.core.management.base import NoArgsBaseCommand
+from django.core.management.base import NoArgsCommand
 from django.db import models
 
 from django_postgres.view import create_views
 
 
-class Command(NoArgsBaseCommand):
+class Command(NoArgsCommand):
     help = 'Creates and Updates all SQL Views'
 
     def handle_noargs(self, **options):
