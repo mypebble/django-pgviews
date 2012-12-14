@@ -65,8 +65,6 @@ def create_views(models_module, *args, **kwargs):
             table=view_cls._meta.db_table,
             select=view_cls.sql)
 
-        print query
-
         cursor = connection.cursor()
         try:
             cursor.execute(query)
