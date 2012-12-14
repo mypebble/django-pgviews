@@ -58,8 +58,15 @@ def create_views(models_module, *args, **kwargs):
                 issubclass(view_cls, View) and
                 hasattr(view_cls, 'sql')):
             continue
-        query = "CREATE OR REPLACE VIEW %s AS %s;" % (view_cls._meta.db_table,
-                                                      view_cls.sql)
+
+        query = 'CREATE OR REPLACE VIEW {table} AS {select}'
+
+        query = query.format(
+            table=view_cls._meta.db_table,
+            select=view_cls.sql)
+
+        print query
+
         cursor = connection.cursor()
         try:
             cursor.execute(query)
