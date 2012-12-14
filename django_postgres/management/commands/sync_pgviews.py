@@ -13,7 +13,7 @@ class Command(NoArgsCommand):
         all_modules = models.get_apps()
         modules = '\n '.join((m.__name__ for m in all_modules))
         self.stdout.write(
-            'Creating Views for all modules:\n{modules}\n'.format(
+            'Creating Views for all modules:\n {modules}\n'.format(
                 modules=modules
             )
         )
