@@ -8,7 +8,7 @@ from django.test import TestCase
 import models
 
 
-class ViewTest(TestCase):
+class ViewTestCase(TestCase):
 
     def setUp(self):
         call_command('sync_pgviews', *[], **{})
@@ -47,3 +47,13 @@ class ViewTest(TestCase):
                                                    is_staff=True)
 
         assert models.Staffness.objects.filter(username='foo').exists()
+
+
+class ViewArgTestCase(ViewTestCase):
+    """Pass module arguments to the View. Run the exact same tests.
+    """
+
+    def setUp(self):
+        apps = ['viewtests']
+        call_command('sync_pgviews', *apps)
+

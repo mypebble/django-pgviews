@@ -1,5 +1,6 @@
 """Syncronise SQL Views.
 """
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import models
 
@@ -14,9 +15,11 @@ class Command(BaseCommand):
         """Run the create_views command.
         """
         if args:
+            modules = [a for a in args if a in settings.INSTALLED_APPS]
+            imported = [__import__(m) for m in modules]
             self.stdout.write(
-                'Creating Views for {modules}'.format(modules=args))
-            for module in args:
+                'Creating Views for {modules}'.format(modules=modules))
+            for module in imported:
                 create_views(module)
         else:
             self.handle_noargs(**options)
