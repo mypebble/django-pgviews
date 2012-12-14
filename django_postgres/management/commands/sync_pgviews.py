@@ -13,16 +13,20 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Run the create_views command.
         """
-        self.stdout.write('Creating Views for {modules}'.format(modules=args))
         if args:
+            self.stdout.write(
+                'Creating Views for {modules}'.format(modules=args))
             for module in args:
                 create_views(module)
         else:
             self.handle_noargs(**options)
-    
+
     def handle_noargs(self, **options):
         all_modules = models.get_apps()
         self.stdout.write(
-            'Creating Views for {modules}'.format(modules=all_modules))
+            'Creating Views for all modules: {modules}'.format(
+                modules=all_modules
+            )
+        )
         for module in all_modules:
             create_views(module)
