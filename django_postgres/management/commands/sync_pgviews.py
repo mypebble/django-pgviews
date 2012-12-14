@@ -11,9 +11,9 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, **options):
         all_modules = models.get_apps()
-        modules = ', '.join((m.__name__ for m in all_modules))
+        modules = '\n '.join((m.__name__ for m in all_modules))
         self.stdout.write(
-            'Creating Views for all modules: {modules}'.format(
+            'Creating Views for all modules:\n{modules}'.format(
                 modules=modules
             )
         )
