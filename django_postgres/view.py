@@ -4,7 +4,7 @@ import collections
 import copy
 import re
 
-from django.db import connection
+from django.db import connection, transaction
 from django.db import models
 
 
@@ -59,7 +59,7 @@ def create_views(models_module, *args, **kwargs):
                 hasattr(view_cls, 'sql')):
             continue
 
-        query = 'CREATE OR REPLACE VIEW {table} AS {select}'
+        query = 'CREATE OR REPLACE VIEW {table} AS {select};'
 
         query = query.format(
             table=view_cls._meta.db_table,
@@ -70,6 +70,7 @@ def create_views(models_module, *args, **kwargs):
         cursor = connection.cursor()
         try:
             cursor.execute(query)
+            transaction.commit_unless_managed()
         finally:
             cursor.close()
 
