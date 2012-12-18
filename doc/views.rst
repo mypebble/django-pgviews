@@ -40,8 +40,8 @@ You can create this view by just subclassing :class:`django_postgres.View`. In
   .. attribute:: sql
 
     The SQL for this view (typically a ``SELECT`` query). This attribute is
-    optional, but if present, the view will be created on ``syncdb`` (which is
-    probably what you want).
+    optional, but if present, the view will be created on ``sync_pgviews``
+    (which is probably what you want).
 
   .. attribute:: projection
 
@@ -93,23 +93,13 @@ Or add an ``id`` column to your view's SQL query (this example uses
                  FROM auth_user;"""
 
 
+Creating the Views
+==================
+
+Creating the views is simple. Just run the ``sync_pgviews`` command.
+
 Migrations
 ==========
 
-Views play well with South migrations; just create the view using raw SQL in a
-schema migration:
-
-.. code-block:: bash
-
-    $ ./manage.py schemamigration --empty myapp create_view_viewname
-    Created 0001_create_view_latest_override.py.
-    $ edit myapp/migrations/0001_create_view_viewname.py
-
-In the migration file::
-
-    def forwards(self, orm):
-        db.execute('''CREATE OR REPLACE VIEW myapp_viewname AS
-                      SELECT * FROM myapp_table WHERE condition;''')
-
-    def backwards(self, orm):
-        db.execute('''DROP VIEW myapp_viewname;''')
+Views play well with South migrations; just run ``sync_pgviews`` after
+``migrate`` to ensure any required tables have been created/updated.
