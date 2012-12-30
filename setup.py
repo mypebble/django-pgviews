@@ -12,8 +12,4 @@ setup(
         'bitstring',
         'Django>=1.3',
     ],
-    test_requires=[
-        'django-nose>=1.1',
-        'nose>=1.2.1',
-    ],
 )
