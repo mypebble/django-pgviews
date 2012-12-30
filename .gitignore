@@ -1,4 +1,6 @@
 *.py[co]
+# Virtualenvs for testing
+.venv
 
 # Packages
 *.egg
