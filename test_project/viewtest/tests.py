@@ -21,7 +21,7 @@ class ViewTestCase(TestCase):
             count, = cur.fetchone()
             self.assertEqual(count, 3)
 
-    def test_wildcard_projection(self):
+    def test_wildcard_projection_gets_all_fields_from_projected_model(self):
         foo_user = auth.models.User.objects.create(
             username='foo', is_superuser=True)
         foo_user.set_password('blah')
@@ -32,7 +32,7 @@ class ViewTestCase(TestCase):
         self.assertEqual(foo_user.id, foo_superuser.id)
         self.assertEqual(foo_user.password, foo_superuser.password)
 
-    def test_limited_projection(self):
+    def test_limited_projection_only_gets_selected_fields_from_projected_model(self):
         foo_user = auth.models.User.objects.create(
             username='foo', is_superuser=True)
         foo_user.set_password('blah')
@@ -43,7 +43,7 @@ class ViewTestCase(TestCase):
         self.assertEqual(foo_simple.password, foo_user.password)
         self.assertFalse(hasattr(foo_simple, 'date_joined'))
 
-    def test_queryset_based_view(self):
+    def test_queryset_based_view_works_similarly_to_raw_sql(self):
         auth.models.User.objects.create(
             username='foo', is_staff=True)
 
