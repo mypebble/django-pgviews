@@ -1,6 +1,10 @@
 *.py[co]
+
 # Virtualenvs for testing
 .venv
+
+# Temporary testing directories
+test__*
 
 # Packages
 *.egg

@@ -3,8 +3,8 @@
 set -e  # die on errors
 set -x  # echo commands as they run
 
-django-admin.py startproject view_project_test
-cd view_project_test
+django-admin.py startproject test__views
+cd test__views
 
 virtualenv .venv
 . .venv/bin/activate
@@ -17,9 +17,9 @@ EOF
 (cd ../../../; python setup.py develop)
 
 export PYTHONPATH="$(pwd):$PYTHONPATH"
-export DJANGO_SETTINGS_MODULE=view_project_test.settings
+export DJANGO_SETTINGS_MODULE=test__views.settings
 export DATABASE_URL="postgresql://localhost/django_postgres_viewtest"
-cat >> view_project_test/settings.py <<EOF
+cat >> test__views/settings.py <<EOF
 import dj_database_url
 DATABASES = {'default': dj_database_url.config()}
 INSTALLED_APPS += type(INSTALLED_APPS)(['django_postgres', 'south', 'view_myapp'])
