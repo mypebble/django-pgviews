@@ -96,10 +96,21 @@ Or add an ``id`` column to your view's SQL query (this example uses
 Creating the Views
 ==================
 
-Creating the views is simple. Just run the ``sync_pgviews`` command.
+Creating the views is simple. Just run the ``sync_pgviews`` command::
+
+    $ ./manage.py sync_pgviews
+    Creating views for django.contrib.auth.models
+    Creating views for django.contrib.contenttypes.models
+    Creating views for myapp.models
+    myapp.models.Superusers (myapp_superusers): created
+    myapp.models.SimpleUser (myapp_simpleuser): created
+    myapp.models.Staffness (myapp_staffness): created
 
 Migrations
 ==========
 
-Views play well with South migrations; just run ``sync_pgviews`` after
-``migrate`` to ensure any required tables have been created/updated.
+Views play well with South migrations. If a migration modifies the underlying
+table(s) that a view depends on so as to break the view, that view will be
+silently deleted by Postgres. For this reason, it's important to run
+``sync_pgviews`` after ``migrate`` to ensure any required tables have been
+created/updated.
