@@ -16,4 +16,6 @@ To run the tests:
        johndoe=# CREATE DATABASE django_postgres;
        CREATE DATABASE
 
-3.  Run `./manage.py test`.
+3.  Run `make test` from this directory. This will create a virtualenv, install
+    the test project requirements, and execute the tests. On subsequent runs,
+    the virtualenv/installation steps will be skipped thanks to the Makefile.
