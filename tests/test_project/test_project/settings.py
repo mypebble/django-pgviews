@@ -1,5 +1,4 @@
 import commands
-import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -147,6 +146,11 @@ LOGGING = {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
+            'propagate': True,
+        },
+        'django_postgres': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
             'propagate': True,
         },
         'django.db.backends': {

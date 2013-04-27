@@ -1,5 +1,4 @@
-from django.contrib import auth
-from django.db import models
+import django.contrib.auth.models as auth_models
 
 import django_postgres
 
@@ -24,4 +23,4 @@ class SimpleUser(django_postgres.View):
 
 class Staffness(django_postgres.View):
     projection = ['auth.User.username', 'auth.User.is_staff']
-    sql = str(auth.models.User.objects.only('username', 'is_staff').query)
+    sql = str(auth_models.User.objects.only('username', 'is_staff').query)

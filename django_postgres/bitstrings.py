@@ -118,6 +118,12 @@ class BitStringExpression(models.expressions.F):
         super(BitStringExpression, self).__init__(field, *args, **kwargs)
         self.lookup = field
 
+    def __and__(self, other):
+        return self.bitand(other)
+
+    def __or__(self, other):
+        return self.bitor(other)
+
     def __xor__(self, other):
         return self._combine(other, self.XOR, False)
 
