@@ -17,7 +17,7 @@ class StatementTestCase(TestCase):
         foo_user.save()
 
         foo_superuser = models.UserTypeCounter.objects.prepare(
-            True)
+            (True, ))
 
         self.assertEqual(foo_superuser.get().my_count, 1)
 

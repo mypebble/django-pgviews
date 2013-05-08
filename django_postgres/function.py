@@ -50,12 +50,17 @@ class StatementManager(models.Manager):
         app_label = self.model._meta.app_label
         module = self.model.__module__
 
+        execute_arguments = ''
+        if args:
+            execute_arguments = ', '.join(unicode(a) for a in args)
+
         execute_statement = u'EXECUTE {name}({args})'.format(
             name=statement_name,
-            args=(', '.join(args) if args else ''))
+            args=execute_arguments)
 
         model = _create_model(
-            model_name, execute_statement, None, app_label, module)
+            model_name + 'hello', execute_statement, None, app_label, module)
+        return models.query.QuerySet(model)
 
     def get_queryset(self):
         """No methods that depend on this can be called until the statement has
