@@ -43,7 +43,19 @@ class StatementManager(models.Manager):
         """Prepare the statement for filtering by executing it with the
         arguments passed.
         """
-        statement_name = self.model._meta.db_table
+        statement_name, statement_args = self.model._meta.db_table.split(u'(')
+        statement_args = u'(' + statement_args
+
+        model_name = self.model.__name__
+        app_label = self.model._meta.app_label
+        module = self.model.__module__
+
+        execute_statement = u'EXECUTE {name}({args})'.format(
+            name=statement_name,
+            args=(', '.join(args) if args else ''))
+
+        model = _create_model(
+            model_name, execute_statement, None, app_label, module)
 
     def get_queryset(self):
         """No methods that depend on this can be called until the statement has
