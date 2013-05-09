@@ -2,6 +2,8 @@
 from django.core import exceptions
 from django.db import models
 
+from django_postgres.db.sql import query
+
 
 def _create_model(name, execute, fields=None, app_label='', module='',
         options=None):
@@ -60,7 +62,7 @@ class StatementManager(models.Manager):
 
         model = _create_model(
             model_name + 'hello', execute_statement, None, app_label, module)
-        return models.query.QuerySet(model)
+        return models.query.QuerySet(model, query.NonQuotingQuery(model))
 
     def get_queryset(self):
         """No methods that depend on this can be called until the statement has
