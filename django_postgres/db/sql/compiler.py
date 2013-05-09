@@ -13,3 +13,9 @@ class NonQuotingCompiler(compiler.SQLCompiler):
 
         self.quote_cache[name] = name
         return name
+
+    def as_sql(self, *args, **kwargs):
+        """Messy hack to create some table aliases for us.
+        """
+        self.query.table_map[self.query.model._meta.db_table] = ['']
+        return super(NonQuotingCompiler, self).as_sql(*args, **kwargs)
