@@ -46,3 +46,34 @@ class FunctionTestCase(TestCase):
         created = create_function(connection, name, field, definition)
 
         self.assertEqual(created, 'CREATED')
+
+    def test_update_function(self):
+        """Update a function with create_function. Functions can only be
+        updated if their signature matches the existing function.
+        """
+        field = ('a_field integer', )
+        definition = 'SELECT 1 from auth_user WHERE id = $1'
+        name = 'my_function (integer)'
+        create_function(connection, name, field, definition)
+
+        definition = 'SELECT 2 from auth_user WHERE id = $1'
+
+        updated = create_function(connection, name, field, definition)
+
+        self.assertEqual(updated, 'UPDATED')
+
+    def test_error_function(self):
+        """Error out if the user tried to update a function with an
+        incompatible signature.
+        """
+        field = ('a_field integer', )
+        definition = 'SELECT 1 from auth_user WHERE id = $1'
+        name = 'my_function (integer)'
+        create_function(connection, name, field, definition)
+
+        name = 'my_function (integer, integer)'
+        definition = 'SELECT 1 from auth_user WHERE id > $1 and id < $2'
+
+        updated = create_function(connection, name, field, definition)
+
+        self.assertEqual(updated, 'ERROR: Manually Drop This Function')
