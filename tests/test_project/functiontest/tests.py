@@ -5,24 +5,23 @@ from django.test import TestCase
 import models
 
 
-class StatementTestCase(TestCase):
+class FunctionTestCase(TestCase):
 
     def test_get_counter(self):
-        """Must run prepare on the manager to prepare the statement to be
-        executed.
+        """Must run call on the manager before querying the result.
         """
         foo_user = auth.models.User.objects.create(
             username='foo', is_superuser=True)
         foo_user.set_password('blah')
         foo_user.save()
 
-        foo_superuser = models.UserTypeCounter.objects.prepare(
+        foo_superuser = models.UserTypeCounter.objects.call(
             (True, ))
 
         self.assertEqual(foo_superuser.get().my_count, 1)
 
-    def test_unprepared(self):
-        """Cannot execute the statement unless you explicitly prepare it first
+    def test_uncalled(self):
+        """Cannot execute the statement unless you explicitly call it first
         """
         foo_user = auth.models.User.objects.create(
             username='foo', is_superuser=True)

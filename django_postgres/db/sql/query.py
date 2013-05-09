@@ -7,8 +7,6 @@ from django_postgres.db.sql import compiler
 class NonQuotingQuery(query.Query):
     """Query class that uses the NonQuotingCompiler.
     """
-    compiler = 'NonQuotingCompiler'
-
     def get_compiler(self, using=None, connection=None):
         """Get the NonQuotingCompiler object.
         """
