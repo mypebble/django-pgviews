@@ -1,6 +1,6 @@
 """Access function-like features in Postgres using Django's ORM."""
 from django.core import exceptions
-from django.db import models, transaction
+from django.db import connection, models, transaction
 
 from django_postgres.db import get_fields_by_name
 from django_postgres.db.sql import query
@@ -31,7 +31,7 @@ def _generate_function(name, args, fields, definition):
 
 
 def create_function(connection, function_name, function_fields,
-        function_definition, update=True, force=False):
+        function_definition, update=True):
     """
     Create a named function on a connection.
 
@@ -39,12 +39,6 @@ def create_function(connection, function_name, function_fields,
     one updated), or an error message otherwise.
 
     If ``update`` is True (default), attempt to update an existing function.
-    If the existing function's definition is incompatible with the new
-    definition, ``force`` (default: False) controls whether or not to drop the
-    old view and create the new one.
-
-    Beware that setting ``force`` will drop functions with the same name,
-    irrespective of whether their arguments match.
     """
     cursor_wrapper = connection.cursor()
     cursor = cursor_wrapper.cursor.cursor
@@ -62,7 +56,6 @@ def create_function(connection, function_name, function_fields,
         u"WHERE   nspname = 'public' and proname = %s;")
         cursor.execute(function_query, [name])
         function_exists = cursor.fetchone()[0] > 0
-        force_required = False
 
         if function_exists and not update:
             return 'EXISTS'
@@ -88,6 +81,28 @@ def create_function(connection, function_name, function_fields,
         return ret
     finally:
         cursor_wrapper.close()
+
+
+def create_functions(models_module, update=True):
+    """Create the database functions for a given models module.
+    """
+    for name, function_cls in vars(models_module).iteritems():
+        is_function = (
+            isinstance(function_cls, type) and
+            issubclass(function_cls, Function) and
+            hasattr(function_cls, 'sql'))
+
+        if not is_function:
+            continue
+
+        function_name = function_cls._meta.db_table
+        fields = tuple(
+            ' '.join(n, b.db_type(connection)) for n, b in
+            get_fields_by_name(function_cls, '*').iteritems())
+        definition = function_cls.sql
+
+        create_function(
+            connection, function_name, fields, definition)
 
 
 def _create_model(name, execute, fields=None, app_label='', module='',
