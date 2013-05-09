@@ -1,7 +1,8 @@
 """Access function-like features in Postgres using Django's ORM."""
 from django.core import exceptions
-from django.db import models
+from django.db import models, transaction
 
+from django_postgres.db import get_fields_by_name
 from django_postgres.db.sql import query
 
 
@@ -9,32 +10,33 @@ def _split_function_args(function_name):
     """Splits the function name into (name, (arg1type, arg2type))
     """
     name, args = function_name.split('(')
-    name = name.trim()
-    args = args.trim().replace(')', '').split(',')
-    return name, tuple(a.trim() for a in args)
+    name = name.strip()
+    args = args.strip().replace(')', '').split(',')
+    return name, tuple(a.strip() for a in args)
 
 
 def _generate_function(name, args, fields, definition):
     """Generate the SQL for creating the function.
     """
-    sql = ("CREATE OR REPLACE FUNCTION {name}({args})"
-      "RETURNS TABLE({fields}) AS"
-      "{definition}"
-      "LANGUAGE sql;")
+    sql = ("CREATE OR REPLACE FUNCTION {name}({args}) "
+      "RETURNS TABLE({fields}) LANGUAGE SQL AS "
+      '$$ {definition}; $$')
 
     arg_string = ', '.join(args)
     field_string = ', '.join(fields)
     sql = sql.format(
         name=name, args=arg_string, fields=field_string, definition=definition)
 
+    return sql
 
-def create_function(connection, function_name, function_definition,
-        update=True, force=False):
+
+def create_function(connection, function_name, function_fields,
+        function_definition, update=True, force=False):
     """
     Create a named function on a connection.
 
-    Returns True if a new function was created (or an existing one updated), or
-    False if nothing was done.
+    Returns a success message if a new function was created (or an existing
+    one updated), or an error message otherwise.
 
     If ``update`` is True (default), attempt to update an existing function.
     If the existing function's definition is incompatible with the new
@@ -51,12 +53,12 @@ def create_function(connection, function_name, function_definition,
 
     try:
         force_required = False
-        # Determine if view already exists.
+        # Determine if function already exists.
         function_query = (
-        u"SELECT  COUNT(*)"
-        u"FROM    pg_catalog.pg_namespace n"
-        u"JOIN    pg_catalog.pg_proc p"
-        u"ON      pronamespace = n.oid"
+        u"SELECT  COUNT(*) "
+        u"FROM    pg_catalog.pg_namespace n "
+        u"JOIN    pg_catalog.pg_proc p "
+        u"ON      pronamespace = n.oid "
         u"WHERE   nspname = 'public' and proname = %s;")
         cursor.execute(function_query, [name])
         function_exists = cursor.fetchone()[0] > 0
@@ -66,19 +68,27 @@ def create_function(connection, function_name, function_definition,
             return 'EXISTS'
         elif function_exists:
             function_detail_query = (
-                u"SELECT  pronargs"
-                u"FROM    pg_catalog.pg_namespace n"
-                u"JOIN    pg_catalog.pg_proc p"
-                u"ON      pronamespace = n.oid"
+                u"SELECT  pronargs "
+                u"FROM    pg_catalog.pg_namespace n "
+                u"JOIN    pg_catalog.pg_proc p "
+                u"ON      pronamespace = n.oid "
                 u"WHERE   nspname = 'public' and proname = %s;")
             cursor.execute(function_detail_query, [name])
             force_required = cursor.fetchone()[0] != len(args)
 
         if not force_required:
-            cursor.execute(
-                _generate_function(name, args, fields, function_definition))
+            function_sql = _generate_function(
+                name, args, function_fields, function_definition)
+            cursor.execute(function_sql)
+            ret = 'UPDATED' if function_exists else 'CREATED'
+        else:
+            ret = 'ERROR: Manually Drop This View'
+
+        transaction.commit_unless_managed()
+        return ret
     finally:
         cursor_wrapper.close()
+
 
 def _create_model(name, execute, fields=None, app_label='', module='',
         options=None):

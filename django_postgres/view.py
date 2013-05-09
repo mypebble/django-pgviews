@@ -9,6 +9,8 @@ from django.db import connection, transaction
 from django.db import models
 import psycopg2
 
+from django_postgres.db import get_fields_by_name
+
 
 FIELD_SPEC_REGEX = (r'^([A-Za-z_][A-Za-z0-9_]*)\.'
                     r'([A-Za-z_][A-Za-z0-9_]*)\.'
@@ -122,27 +124,6 @@ def create_view(connection, view_name, view_query, update=True, force=False):
         return ret
     finally:
         cursor_wrapper.close()
-
-
-
-def get_fields_by_name(model_cls, *field_names):
-    """Return a dict of `models.Field` instances for named fields.
-
-    Supports wildcard fetches using `'*'`.
-
-        >>> get_fields_by_name(User, 'username', 'password')
-        {'username': <django.db.models.fields.CharField: username>,
-         'password': <django.db.models.fields.CharField: password>}
-
-        >>> get_fields_by_name(User, '*')
-        {'username': <django.db.models.fields.CharField: username>,
-         ...,
-         'date_joined': <django.db.models.fields.DateTimeField: date_joined>}
-    """
-    if '*' in field_names:
-        return dict((field.name, field) for field in model_cls._meta.fields)
-    return dict((field_name, model_cls._meta.get_field_by_name(field_name)[0])
-                for field_name in field_names)
 
 
 class View(models.Model):
