@@ -18,6 +18,9 @@ var
 sdist
 develop-eggs
 .installed.cfg
+include
+lib
+local
 
 # Sphinx docs
 doc/_build
@@ -34,3 +37,10 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+# Compiled
+*.pyc
+
+# Temporary files
+*~
+.*.swp
