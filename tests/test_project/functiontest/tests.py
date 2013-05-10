@@ -9,7 +9,7 @@ from django_postgres.function import (create_function, create_functions,
     _function_exists)
 
 
-class FunctionTestCase(TestCase):
+class FunctionModelTestCase(TestCase):
     """Test the Function API.
     """
     def test_get_counter(self):
@@ -38,6 +38,10 @@ class FunctionTestCase(TestCase):
             models.UserTypeCounter.objects.filter,
             pk=1)
 
+
+class LowLeveFunctionTestCase(TestCase):
+    """Low level tests for function creation.
+    """
     def test_create_function(self):
         """Create a function with the low-level create_function API.
         """
@@ -83,7 +87,10 @@ class FunctionTestCase(TestCase):
         """Create functions using the create_functions and passing the models
         module.
         """
-        create_functions(models)
+        create_result = create_functions(models)
+
+        for status, _, _ in create_result:
+            self.assertEqual(status, 'CREATED')
 
         # Now check it was created
         cursor_wrapper = connection.cursor()

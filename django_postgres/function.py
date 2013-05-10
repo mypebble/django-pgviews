@@ -126,8 +126,19 @@ def create_functions(models_module, update=True):
 
         definition = function_cls.sql
 
-        create_function(
-            connection, function_name, fields, definition)
+        full_name = u'{module}.{cls}'.format(
+            module=models_module.__name__,
+            cls=name)
+
+        try:
+            created = create_function(
+                connection, function_name, fields, definition)
+        except Exception, exc:
+            exc.function_cls = function_cls
+            exc.python_name = full_name
+            raise
+        else:
+            yield created, function_cls, full_name
 
 
 def _create_model(name, execute, fields=None, app_label='', module='',
