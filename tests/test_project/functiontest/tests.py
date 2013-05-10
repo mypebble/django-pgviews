@@ -5,7 +5,8 @@ from django.test import TestCase
 
 import models
 
-from django_postgres.function import create_function
+from django_postgres.function import (create_function, create_functions,
+    _function_exists)
 
 
 class FunctionTestCase(TestCase):
@@ -77,3 +78,14 @@ class FunctionTestCase(TestCase):
         updated = create_function(connection, name, field, definition)
 
         self.assertEqual(updated, 'ERROR: Manually Drop This Function')
+
+    def test_create_functions_from_models(self):
+        """Create functions using the create_functions and passing the models
+        module.
+        """
+        create_functions(models)
+
+        # Now check it was created
+        cursor_wrapper = connection.cursor()
+        cursor = cursor_wrapper.cursor
+        self.assertEqual(_function_exists(cursor, 'user_type'), True)

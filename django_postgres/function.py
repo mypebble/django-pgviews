@@ -30,6 +30,33 @@ def _generate_function(name, args, fields, definition):
     return sql
 
 
+def _function_exists(cursor, name):
+    """Returns True or False depending whether function with name exists.
+    """
+    function_query = (
+    u"SELECT  COUNT(*) "
+    u"FROM    pg_catalog.pg_namespace n "
+    u"JOIN    pg_catalog.pg_proc p "
+    u"ON      pronamespace = n.oid "
+    u"WHERE   nspname = 'public' and proname = %s;")
+    cursor.execute(function_query, [name])
+    return cursor.fetchone()[0] > 0
+
+
+def _force_required(cursor, name, args):
+    """Returns whether the function signature is compatible with the new
+    definition.
+    """
+    function_detail_query = (
+        u"SELECT  pronargs "
+        u"FROM    pg_catalog.pg_namespace n "
+        u"JOIN    pg_catalog.pg_proc p "
+        u"ON      pronamespace = n.oid "
+        u"WHERE   nspname = 'public' and proname = %s;")
+    cursor.execute(function_detail_query, [name])
+    return cursor.fetchone()[0] != len(args)
+
+
 def create_function(connection, function_name, function_fields,
         function_definition, update=True):
     """
@@ -41,37 +68,25 @@ def create_function(connection, function_name, function_fields,
     If ``update`` is True (default), attempt to update an existing function.
     """
     cursor_wrapper = connection.cursor()
-    cursor = cursor_wrapper.cursor.cursor
+    cursor = cursor_wrapper.cursor
 
     name, args = _split_function_args(function_name)
 
     try:
         force_required = False
-        # Determine if function already exists.
-        function_query = (
-        u"SELECT  COUNT(*) "
-        u"FROM    pg_catalog.pg_namespace n "
-        u"JOIN    pg_catalog.pg_proc p "
-        u"ON      pronamespace = n.oid "
-        u"WHERE   nspname = 'public' and proname = %s;")
-        cursor.execute(function_query, [name])
-        function_exists = cursor.fetchone()[0] > 0
+
+        function_exists = _function_exists(cursor, name)
 
         if function_exists and not update:
             return 'EXISTS'
         elif function_exists:
-            function_detail_query = (
-                u"SELECT  pronargs "
-                u"FROM    pg_catalog.pg_namespace n "
-                u"JOIN    pg_catalog.pg_proc p "
-                u"ON      pronamespace = n.oid "
-                u"WHERE   nspname = 'public' and proname = %s;")
-            cursor.execute(function_detail_query, [name])
-            force_required = cursor.fetchone()[0] != len(args)
+            force_required = _force_required(cursor, name, args)
 
         if not force_required:
             function_sql = _generate_function(
                 name, args, function_fields, function_definition)
+
+            print function_sql
             cursor.execute(function_sql)
             ret = 'UPDATED' if function_exists else 'CREATED'
         else:
@@ -81,6 +96,15 @@ def create_function(connection, function_name, function_fields,
         return ret
     finally:
         cursor_wrapper.close()
+
+
+def _get_field_type(field):
+    """Returns the field type as a string for SQL.
+    """
+    return field.db_type(
+        connection).replace(
+        'serial', 'bigint').replace(
+        'integer', 'bigint')
 
 
 def create_functions(models_module, update=True):
@@ -97,8 +121,9 @@ def create_functions(models_module, update=True):
 
         function_name = function_cls._meta.db_table
         fields = tuple(
-            ' '.join(n, b.db_type(connection)) for n, b in
+            ' '.join((n, _get_field_type(f))) for n, f in
             get_fields_by_name(function_cls, '*').iteritems())
+
         definition = function_cls.sql
 
         create_function(
