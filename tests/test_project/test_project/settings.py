@@ -116,6 +116,7 @@ INSTALLED_APPS = (
     'viewtest',
     'arraytest',
     'bitstringtest',
+    'functiontest',
 )
 
 # A sample logging configuration. The only tangible logging

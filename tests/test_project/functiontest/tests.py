@@ -1,5 +1,5 @@
 from django.contrib import auth
-from django.core import exceptions
+from django.core import exceptions, management
 from django.db import connection
 from django.test import TestCase
 
@@ -12,6 +12,9 @@ from django_postgres.function import (create_function, create_functions,
 class FunctionModelTestCase(TestCase):
     """Test the Function API.
     """
+    def setUp(self):
+        management.call_command('sync_pgfunctions', *[], **{})
+
     def test_get_counter(self):
         """Must run call on the manager before querying the result.
         """
@@ -93,6 +96,16 @@ class LowLeveFunctionTestCase(TestCase):
             self.assertEqual(status, 'CREATED')
 
         # Now check it was created
+        cursor_wrapper = connection.cursor()
+        cursor = cursor_wrapper.cursor
+        self.assertEqual(_function_exists(cursor, 'user_type'), True)
+
+    def test_create_command(self):
+        """Test the sync_pgfunctions command.
+        """
+        management.call_command('sync_pgfunctions', *[], **{})
+
+        # Check it was created
         cursor_wrapper = connection.cursor()
         cursor = cursor_wrapper.cursor
         self.assertEqual(_function_exists(cursor, 'user_type'), True)

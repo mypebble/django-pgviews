@@ -12,6 +12,7 @@ log = logging.getLogger('django_postgres.sync_pgfunctions')
 
 class Command(NoArgsCommand):
     help = """Create/update Postgres functions for all installed apps."""
+
     option_list = NoArgsCommand.option_list + (
         make_option(
             '--no-update',
@@ -21,7 +22,7 @@ class Command(NoArgsCommand):
             help="""Don't update existing functions, only create new ones."""),
     )
 
-    def handle_noargs(self, force, update, **options):
+    def handle_noargs(self, update, **options):
         for module in models.get_apps():
             log.info("Creating functions for %s", module.__name__)
             try:

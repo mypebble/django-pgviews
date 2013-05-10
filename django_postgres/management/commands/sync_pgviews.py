@@ -40,7 +40,9 @@ class Command(NoArgsCommand):
                     elif status == 'FORCED':
                         msg = "forced overwrite of existing schema"
                     elif status == 'FORCE_REQUIRED':
-                        msg = "exists with incompatible schema, --force required to update"
+                        msg = (
+                            "exists with incompatible schema, "
+                            "--force required to update")
                     log.info("%(python_name)s (%(view_name)s): %(msg)s" % {
                         'python_name': python_name,
                         'view_name': view_cls._meta.db_table,

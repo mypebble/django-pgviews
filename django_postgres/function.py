@@ -197,7 +197,7 @@ class FunctionManager(models.Manager):
             args=execute_arguments)
 
         model = _create_model(
-            model_name + 'hello', execute_function, None, app_label, module)
+            model_name, execute_function, None, app_label, module)
         return models.query.QuerySet(model, query.NonQuotingQuery(model))
 
     def get_queryset(self):
