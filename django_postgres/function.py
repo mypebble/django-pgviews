@@ -201,7 +201,7 @@ class FunctionManager(models.Manager):
             model_name, execute_function, fields, app_label, module)
         return models.query.QuerySet(model, query.NonQuotingQuery(model))
 
-    def get_queryset(self):
+    def get_query_set(self):
         """No methods that depend on this can be called until the function has
         been called.
         """
