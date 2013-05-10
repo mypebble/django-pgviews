@@ -86,7 +86,6 @@ def create_function(connection, function_name, function_fields,
             function_sql = _generate_function(
                 name, args, function_fields, function_definition)
 
-            print function_sql
             cursor.execute(function_sql)
             ret = 'UPDATED' if function_exists else 'CREATED'
         else:
@@ -168,7 +167,8 @@ def _create_model(name, execute, fields=None, app_label='', module='',
     if fields:
         attrs.update(fields)
 
-    return type(name, (models.Model,), attrs)
+    name_to_use = '{0}Function'.format(name)
+    return type(name_to_use, (models.Model,), attrs)
 
 
 class FunctionManager(models.Manager):
@@ -196,8 +196,9 @@ class FunctionManager(models.Manager):
             name=function_name,
             args=execute_arguments)
 
+        fields = get_fields_by_name(self.model, '*')
         model = _create_model(
-            model_name, execute_function, None, app_label, module)
+            model_name, execute_function, fields, app_label, module)
         return models.query.QuerySet(model, query.NonQuotingQuery(model))
 
     def get_queryset(self):
