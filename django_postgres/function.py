@@ -89,7 +89,7 @@ def create_function(connection, function_name, function_fields,
             cursor.execute(function_sql)
             ret = 'UPDATED' if function_exists else 'CREATED'
         else:
-            ret = 'ERROR: Manually Drop This Function'
+            ret = 'ERROR'
 
         transaction.commit_unless_managed()
         return ret
