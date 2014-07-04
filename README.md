@@ -62,3 +62,25 @@ class PreferredCustomer(pg.View):
 
     sql = VIEW_SQL
 ```
+
+Django Compatibility
+--------------------
+
+<table>
+    <thead>
+        <tr>
+            <th>Django Version</th>
+            <th>Django-PGView Version</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>1.4 and down</td>
+            <td>Unsupported</td>
+        </tr>
+        <tr>
+            <td>1.5</td>
+            <td>0.0.1</td>
+        </tr>
+    </tbody>
+</table>
