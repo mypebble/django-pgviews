@@ -8,7 +8,4 @@ setup(
     author_email='scott.walton@mypebble.co.uk',
     license='Public Domain',
     packages=find_packages(),
-    install_requires=[
-        'Django>=1.4',
-    ],
 )
