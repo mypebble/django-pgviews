@@ -1,0 +1,8 @@
+dependencies:
+    post:
+        - python setup.py develop
+        - pip install -r tests/requirements.txt
+
+test:
+    override:
+        - cd tests/test_project && python manage.py test viewtest --settings=test_project.settings.ci
