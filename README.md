@@ -82,5 +82,9 @@ Django Compatibility
             <td>1.5</td>
             <td>0.0.1</td>
         </tr>
+        <tr>
+            <td>1.6</td>
+            <td>0.0.2</td>
+        </tr>
     </tbody>
 </table>
