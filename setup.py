@@ -1,14 +1,14 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='django-postgres',
-    version='0.0.8',
-    description="First-class Postgres feature support for the Django ORM.",
-    author='Zachary Voase',
-    author_email='z@zacharyvoase.com',
+    name='django-pgviews',
+    version='0.0.1',
+    description="Create and manage Postgres SQL Views in Django",
+    author='Scott Walton',
+    author_email='scott.walton@mypebble.co.uk',
     license='Public Domain',
     packages=find_packages(),
     install_requires=[
-        'Django>=1.3',
+        'Django>=1.4',
     ],
 )

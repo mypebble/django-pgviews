@@ -1,7 +1,7 @@
 from django.db import connections
 from django.db.models.sql import query
 
-from django_postgres.db.sql import compiler
+from django_pgviews.db.sql import compiler
 
 
 class NonQuotingQuery(query.Query):

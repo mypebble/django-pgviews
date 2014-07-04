@@ -9,7 +9,7 @@ from django.db import connection, transaction
 from django.db import models
 import psycopg2
 
-from django_postgres.db import get_fields_by_name
+from django_pgviews.db import get_fields_by_name
 
 
 FIELD_SPEC_REGEX = (r'^([A-Za-z_][A-Za-z0-9_]*)\.'
@@ -17,7 +17,7 @@ FIELD_SPEC_REGEX = (r'^([A-Za-z_][A-Za-z0-9_]*)\.'
                     r'(\*|(?:[A-Za-z_][A-Za-z0-9_]*))$')
 FIELD_SPEC_RE = re.compile(FIELD_SPEC_REGEX)
 
-log = logging.getLogger('django_postgres.view')
+log = logging.getLogger('django_pgviews.view')
 
 
 def hasfield(model_cls, field_name):

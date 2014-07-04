@@ -4,10 +4,10 @@ import logging
 from django.core.management.base import NoArgsCommand
 from django.db import models
 
-from django_postgres.view import create_views
+from django_pgviews.view import create_views
 
 
-log = logging.getLogger('django_postgres.sync_pgviews')
+log = logging.getLogger('django_pgviews.sync_pgviews')
 
 
 class Command(NoArgsCommand):
