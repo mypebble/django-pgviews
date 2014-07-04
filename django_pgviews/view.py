@@ -89,7 +89,7 @@ def create_view(connection, view_name, view_query, update=True, force=False):
     the new one.
     """
     cursor_wrapper = connection.cursor()
-    cursor = cursor_wrapper.cursor.cursor
+    cursor = cursor_wrapper.cursor
     try:
         force_required = False
         # Determine if view already exists.

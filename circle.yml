@@ -5,4 +5,4 @@ dependencies:
 
 test:
     override:
-        - cd tests/test_project && python manage.py test viewtest --settings=test_project.settings.ci
+        - cd tests/test_project && python manage.py test test_project.viewtest --settings=test_project.settings.ci
