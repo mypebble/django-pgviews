@@ -126,6 +126,40 @@ def create_view(connection, view_name, view_query, update=True, force=False):
         cursor_wrapper.close()
 
 
+def clear_views(models_module):
+    """Remove the database views for a given models_module."""
+    for name, view_cls in vars(models_module).iteritems():
+        if not (isinstance(view_cls, type) and
+                issubclass(view_cls, View) and
+                hasattr(view_cls, 'sql')):
+            continue
+
+        try:
+            cleared = clear_view(
+                connection, view_cls._meta.db_table)
+        except Exception, exc:
+            exc.view_cls = view_cls
+            exc.python_name = models_module.__name__ + '.' + name
+            raise
+        else:
+            yield cleared, view_cls, models_module.__name__ + '.' + name
+
+
+def clear_view(connection, view_name):
+    """
+    Remove a named view on connection.
+    """
+    cursor_wrapper = connection.cursor()
+    cursor = cursor_wrapper.cursor
+    try:
+        cursor.execute('DROP VIEW IF EXISTS {0}'.format(view_name))
+
+        transaction.commit_unless_managed()
+    finally:
+        cursor_wrapper.close()
+    return u'DROPPED'.format(view=view_name)
+
+
 class View(models.Model):
 
     """Helper for exposing Postgres views as Django models."""

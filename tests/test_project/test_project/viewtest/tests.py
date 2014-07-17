@@ -21,6 +21,15 @@ class ViewTestCase(TestCase):
             count, = cur.fetchone()
             self.assertEqual(count, 3)
 
+    def test_clear_views(self):
+        call_command('clear_pgviews', *[], **{})
+        with closing(connection.cursor()) as cur:
+            cur.execute('''SELECT COUNT(*) FROM pg_views
+                        WHERE viewname LIKE 'viewtest_%';''')
+
+            count, = cur.fetchone()
+            self.assertEqual(count, 0)
+
     def test_wildcard_projection_gets_all_fields_from_projected_model(self):
         foo_user = auth.models.User.objects.create(
             username='foo', is_superuser=True)
