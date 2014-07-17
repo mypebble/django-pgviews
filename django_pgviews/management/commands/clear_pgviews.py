@@ -1,4 +1,3 @@
-from optparse import make_option
 import logging
 
 from django.core.management.base import NoArgsCommand
