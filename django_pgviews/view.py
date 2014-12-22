@@ -122,7 +122,6 @@ def create_view(connection, view_name, view_query, update=True, force=False):
         else:
             ret = 'FORCE_REQUIRED'
 
-        transaction.commit_unless_managed()
         return ret
     finally:
         cursor_wrapper.close()

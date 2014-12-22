@@ -35,7 +35,15 @@ class Customer(models.Model):
 class PreferredCustomer(pg.View):
     projection = ['myapp.Customer.*']
     sql = """SELECT * FROM myapp_customer WHERE is_preferred = TRUE;"""
+
+    class Meta:
+      app_label = 'myapp'
+      db_table = 'myapp_preferredcustomer'
+      managed = False
 ```
+
+**NOTE** It is important that we include the `managed = False` in the `Meta` so
+Django 1.7 migrations don't attempt to create DB tables for this view.
 
 The SQL produced by this might look like:
 
