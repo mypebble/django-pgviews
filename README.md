@@ -1,5 +1,6 @@
 SQL Views for Postgres
 ======================
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/mypebble/django-pgviews?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Adds first-class support for [PostgreSQL Views][pg-views] in the Django ORM
 
