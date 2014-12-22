@@ -1,5 +1,3 @@
-import django.contrib.auth.models as auth_models
-
 import django_pgviews
 
 
@@ -19,8 +17,3 @@ class SimpleUser(django_pgviews.View):
         password,
         row_number() OVER () AS id
     FROM auth_user;"""
-
-
-class Staffness(django_pgviews.View):
-    projection = ['auth.User.username', 'auth.User.is_staff']
-    sql = str(auth_models.User.objects.only('username', 'is_staff').query)

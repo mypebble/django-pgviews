@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-pgviews',
-    version='0.0.3',
+    version='0.0.4',
     description="Create and manage Postgres SQL Views in Django",
     author='Scott Walton',
     author_email='scott.walton@mypebble.co.uk',

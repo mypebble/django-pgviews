@@ -67,24 +67,34 @@ Django Compatibility
 --------------------
 
 <table>
-    <thead>
-        <tr>
-            <th>Django Version</th>
-            <th>Django-PGView Version</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>1.4 and down</td>
-            <td>Unsupported</td>
-        </tr>
-        <tr>
-            <td>1.5</td>
-            <td>0.0.1</td>
-        </tr>
-        <tr>
-            <td>1.6</td>
-            <td>0.0.2</td>
-        </tr>
-    </tbody>
+  <thead>
+    <tr>
+      <th>Django Version</th>
+      <th>Django-PGView Version</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1.4 and down</td>
+      <td>Unsupported</td>
+    </tr>
+    <tr>
+      <td>1.5</td>
+      <td>0.0.1</td>
+    </tr>
+    <tr>
+      <td>1.6</td>
+      <td>0.0.3</td>
+    </tr>
+    <tr>
+      <td>1.7</td>
+      <td>0.0.4</td>
+    </tr>
+  </tbody>
 </table>
+
+### Django 1.7 Note
+
+Django 1.7 changed how models are loaded so that it's no longer possible to do
+`sql = str(User.objects.all().query)` because the dependent models aren't
+yet loaded by Django.

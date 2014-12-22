@@ -1,10 +1,11 @@
-"""Helpers to access Postgres views from the Django ORM."""
-
+"""Helpers to access Postgres views from the Django ORM.
+"""
 import collections
 import copy
 import logging
 import re
 
+from django.core import exceptions
 from django.db import connection, transaction
 from django.db import models
 import psycopg2
@@ -161,8 +162,8 @@ def clear_view(connection, view_name):
 
 
 class View(models.Model):
-
-    """Helper for exposing Postgres views as Django models."""
+    """Helper for exposing Postgres views as Django models.
+    """
 
     class ViewMeta(models.base.ModelBase):
 
@@ -185,17 +186,28 @@ class View(models.Model):
                                                      attrs)
             for app_label, model_name, field_name in deferred_projections:
                 model_spec = (app_label, model_name.lower())
+
                 _DEFERRED_PROJECTIONS[model_spec][view_cls].append(field_name)
-                # If the model has already been loaded, run
-                # `realize_deferred_projections()` on it.
-                model_cls = models.get_model(app_label, model_name,
-                                             seed_cache=False)
-                if model_cls is not None:
-                    realize_deferred_projections(model_cls)
+                _realise_projections(app_label, model_name)
+
             return view_cls
+
+
 
     __metaclass__ = ViewMeta
 
     class Meta:
         abstract = True
         managed = False
+
+
+def _realise_projections(app_label, model_name):
+    """Checks whether the model has been loaded and runs
+    realise_deferred_projections() if it has.
+    """
+    try:
+        model_cls = models.get_model(app_label, model_name)
+    except exceptions.AppRegistryNotReady:
+        return
+    if model_cls is not None:
+        realize_deferred_projections(model_cls)
