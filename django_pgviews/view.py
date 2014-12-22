@@ -59,8 +59,9 @@ models.signals.class_prepared.connect(realize_deferred_projections)
 
 
 def create_views(models_module, update=True, force=False):
-    """Create the database views for a given models module."""
-    for name, view_cls in vars(models_module).iteritems():
+    """Create the database views for a given models module.
+    """
+    for name, view_cls in vars(models_module).items():
         if not (isinstance(view_cls, type) and
                 issubclass(view_cls, View) and
                 hasattr(view_cls, 'sql')):
@@ -115,7 +116,7 @@ def create_view(connection, view_name, view_query, update=True, force=False):
             cursor.execute('CREATE OR REPLACE VIEW {0} AS {1};'.format(view_name, view_query))
             ret = view_exists and 'UPDATED' or 'CREATED'
         elif force:
-            cursor.execute('DROP VIEW {0};'.format(view_name))
+            cursor.execute('DROP VIEW IF EXISTS {0};'.format(view_name))
             cursor.execute('CREATE VIEW {0} AS {1};'.format(view_name, view_query))
             ret = 'FORCED'
         else:
@@ -154,8 +155,6 @@ def clear_view(connection, view_name):
     cursor = cursor_wrapper.cursor
     try:
         cursor.execute('DROP VIEW IF EXISTS {0}'.format(view_name))
-
-        transaction.commit_unless_managed()
     finally:
         cursor_wrapper.close()
     return u'DROPPED'.format(view=view_name)

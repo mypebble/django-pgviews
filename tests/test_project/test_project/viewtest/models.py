@@ -1,4 +1,12 @@
+from django.db import models
+
 import django_pgviews
+
+
+class TestModel(models.Model):
+    """Test model with some basic data for running migrate tests against.
+    """
+    name = models.CharField(max_length=100)
 
 
 class Superusers(django_pgviews.View):

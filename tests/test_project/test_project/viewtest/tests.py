@@ -9,9 +9,8 @@ import models
 
 
 class ViewTestCase(TestCase):
-
-    def setUp(self):
-        call_command('sync_pgviews', *[], **{})
+    """Run the tests to ensure the post_migrate hooks were called.
+    """
 
     def test_views_have_been_created(self):
         """Look at the PG View table to ensure views were created.
