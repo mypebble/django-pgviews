@@ -7,6 +7,8 @@ ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
 
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
 MANAGERS = ADMINS
 
 DATABASES = {

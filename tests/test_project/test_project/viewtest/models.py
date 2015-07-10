@@ -25,3 +25,8 @@ class SimpleUser(django_pgviews.View):
         password,
         row_number() OVER () AS id
     FROM auth_user;"""
+
+
+class RelatedView(django_pgviews.ReadOnlyView):
+    sql = """SELECT id AS model_id, id FROM viewtest_testmodel"""
+    model = models.ForeignKey(TestModel)

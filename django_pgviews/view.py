@@ -7,6 +7,7 @@ import re
 
 from django.core import exceptions
 from django.db import connection, transaction
+from django.db.models.query import QuerySet
 from django.db import models
 import psycopg2
 
@@ -165,6 +166,9 @@ class View(models.Model):
 
     class ViewMeta(models.base.ModelBase):
 
+        abstract = True
+        managed = False
+
         def __new__(metacls, name, bases, attrs):
             projection = attrs.pop('projection', [])
             deferred_projections = []
@@ -209,3 +213,22 @@ def _realise_projections(app_label, model_name):
         return
     if model_cls is not None:
         realize_deferred_projections(model_cls)
+
+
+class ReadOnlyViewQuerySet(QuerySet):
+    def _raw_delete(self, *args, **kwargs):
+        pass
+
+
+class ReadOnlyViewManager(models.Manager):
+    def get_queryset(self):
+        return ReadOnlyViewQuerySet(self.model, using=self._db)
+
+
+class ReadOnlyView(View):
+    _base_manager = ReadOnlyViewManager()
+    objects = ReadOnlyViewManager()
+
+    class Meta:
+        abstract = True
+        managed = False
