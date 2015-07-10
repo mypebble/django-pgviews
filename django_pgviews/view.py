@@ -219,6 +219,24 @@ class ReadOnlyViewQuerySet(QuerySet):
     def _raw_delete(self, *args, **kwargs):
         pass
 
+    def delete(self):
+        raise NotImplementedError("Not allowed")
+
+    def update(self, **kwargs):
+        raise NotImplementedError("Not allowed")
+
+    def _update(self, values):
+        raise NotImplementedError("Not allowed")
+
+    def create(self, **kwargs):
+        raise NotImplementedError("Not allowed")
+
+    def update_or_create(self, defaults=None, **kwargs):
+        raise NotImplementedError("Not allowed")
+
+    def bulk_create(self, objs, batch_size=None):
+        raise NotImplementedError("Not allowed")
+
 
 class ReadOnlyViewManager(models.Manager):
     def get_queryset(self):
