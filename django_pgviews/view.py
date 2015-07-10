@@ -166,9 +166,6 @@ class View(models.Model):
 
     class ViewMeta(models.base.ModelBase):
 
-        abstract = True
-        managed = False
-
         def __new__(metacls, name, bases, attrs):
             projection = attrs.pop('projection', [])
             deferred_projections = []
