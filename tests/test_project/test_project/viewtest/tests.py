@@ -20,7 +20,7 @@ class ViewTestCase(TestCase):
                         WHERE viewname LIKE 'viewtest_%';''')
 
             count, = cur.fetchone()
-            self.assertEqual(count, 2)
+            self.assertEqual(count, 3)
 
     def test_clear_views(self):
         """Check the PG View table to see that th eviews were removed.
@@ -59,3 +59,11 @@ class ViewTestCase(TestCase):
         self.assertEqual(foo_simple.username, foo_user.username)
         self.assertEqual(foo_simple.password, foo_user.password)
         self.assertFalse(getattr(foo_simple, 'date_joined', False))
+
+    def test_related_delete(self):
+        """Test views do not interfere with deleting the models
+        """
+        tm = models.TestModel()
+        tm.name = "Bob"
+        tm.save()
+        tm.delete()
