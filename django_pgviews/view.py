@@ -70,7 +70,8 @@ def create_views(models_module, update=True, force=False):
 
         try:
             created = create_view(connection, view_cls._meta.db_table,
-                                  view_cls.sql, update=update, force=force)
+                                  view_cls.sql, update=update, force=force,
+                                  materialized=isinstance(view_cls(), MaterializedView))
         except Exception, exc:
             exc.view_cls = view_cls
             exc.python_name = models_module.__name__ + '.' + name
@@ -79,7 +80,8 @@ def create_views(models_module, update=True, force=False):
             yield created, view_cls, models_module.__name__ + '.' + name
 
 
-def create_view(connection, view_name, view_query, update=True, force=False):
+def create_view(connection, view_name, view_query, update=True, force=False,
+        materialized=False):
     """
     Create a named view on a connection.
 
@@ -113,7 +115,11 @@ def create_view(connection, view_name, view_query, update=True, force=False):
             finally:
                 cursor.execute('DROP VIEW IF EXISTS check_conflict;')
 
-        if not force_required:
+        if materialized:
+            cursor.execute('DROP MATERIALIZED VIEW IF EXISTS {0};'.format(view_name))
+            cursor.execute('CREATE MATERIALIZED VIEW {0} AS {1};'.format(view_name, view_query))
+            ret = view_exists and 'UPDATED' or 'CREATED'
+        elif not force_required:
             cursor.execute('CREATE OR REPLACE VIEW {0} AS {1};'.format(view_name, view_query))
             ret = view_exists and 'UPDATED' or 'CREATED'
         elif force:
@@ -138,7 +144,8 @@ def clear_views(models_module):
 
         try:
             cleared = clear_view(
-                connection, view_cls._meta.db_table)
+                connection, view_cls._meta.db_table,
+                materialized=isinstance(view_cls(), MaterializedView))
         except Exception, exc:
             exc.view_cls = view_cls
             exc.python_name = models_module.__name__ + '.' + name
@@ -147,14 +154,17 @@ def clear_views(models_module):
             yield cleared, view_cls, models_module.__name__ + '.' + name
 
 
-def clear_view(connection, view_name):
+def clear_view(connection, view_name, materialized=False):
     """
     Remove a named view on connection.
     """
     cursor_wrapper = connection.cursor()
     cursor = cursor_wrapper.cursor
     try:
-        cursor.execute('DROP VIEW IF EXISTS {0}'.format(view_name))
+        if materialized:
+            cursor.execute('DROP MATERIALIZED VIEW IF EXISTS {0}'.format(view_name))
+        else:
+            cursor.execute('DROP VIEW IF EXISTS {0}'.format(view_name))
     finally:
         cursor_wrapper.close()
     return u'DROPPED'.format(view=view_name)
@@ -241,6 +251,39 @@ class ReadOnlyViewManager(models.Manager):
 
 
 class ReadOnlyView(View):
+    """View which cannot be altered
+    """
+    _base_manager = ReadOnlyViewManager()
+    objects = ReadOnlyViewManager()
+
+    class Meta:
+        abstract = True
+        managed = False
+
+
+class MaterializedView(View):
+    """A materialized view.
+    More information:
+    http://www.postgresql.org/docs/current/static/sql-creatematerializedview.html
+    """
+    @classmethod
+    def refresh(self):
+        cursor_wrapper = connection.cursor()
+        cursor = cursor_wrapper.cursor
+        try:
+            cursor.execute('REFRESH MATERIALIZED VIEW {0}'.format(
+                self._meta.db_table))
+        finally:
+            cursor_wrapper.close()
+
+    class Meta:
+        abstract = True
+        managed = False
+
+
+class ReadOnlyMaterializedView(MaterializedView):
+    """Read-only version of the materialized view
+    """
     _base_manager = ReadOnlyViewManager()
     objects = ReadOnlyViewManager()
 

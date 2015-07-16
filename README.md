@@ -103,6 +103,44 @@ Django Compatibility
   </tbody>
 </table>
 
+### Materialized Views
+
+Postgres 9.3 and up supports [materialized views](http://www.postgresql.org/docs/current/static/sql-creatematerializedview.html)
+which allow you to cache the results of views, potentially allowing them
+to load faster.
+
+However, you do need to manually refresh the view. To do this automatically,
+you can attach [signals](https://docs.djangoproject.com/en/1.8/ref/signals/)
+and call the refresh function.
+
+Example:
+
+```python
+import django_postgres as pg
+
+
+VIEW_SQL = """
+    SELECT name, post_code FROM myapp_customer WHERE is_preferred = TRUE
+"""
+
+class Customer(models.Model):
+    name = models.CharField(max_length=100)
+    post_code = models.CharField(max_length=20)
+    is_preferred = models.BooleanField(default=True)
+
+
+class PreferredCustomer(pg.MaterializedView):
+    name = models.CharField(max_length=100)
+    post_code = models.CharField(max_length=20)
+
+    sql = VIEW_SQL
+
+
+@receiver(post_save, sender=Customer)
+def customer_saved(sender, action=None, instance=None, **kwargs):
+    PreferredCustomer.refresh()
+```
+
 ### Django 1.7 Note
 
 Django 1.7 changed how models are loaded so that it's no longer possible to do

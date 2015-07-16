@@ -22,6 +22,12 @@ class ViewTestCase(TestCase):
             count, = cur.fetchone()
             self.assertEqual(count, 3)
 
+            cur.execute('''SELECT COUNT(*) FROM pg_matviews
+                        WHERE matviewname LIKE 'viewtest_%';''')
+
+            count, = cur.fetchone()
+            self.assertEqual(count, 1)
+
     def test_clear_views(self):
         """Check the PG View table to see that th eviews were removed.
         """
@@ -67,3 +73,21 @@ class ViewTestCase(TestCase):
         tm.name = "Bob"
         tm.save()
         tm.delete()
+
+    def test_materialized_view(self):
+        """Test a materialized view works correctly
+        """
+        self.assertEqual(models.MaterializedRelatedView.objects.count(), 0,
+            'Materialized view should not have anything')
+
+        tm = models.TestModel()
+        tm.name = "Bob"
+        tm.save()
+
+        self.assertEqual(models.MaterializedRelatedView.objects.count(), 0,
+            'Materialized view should not have anything')
+
+        models.MaterializedRelatedView.refresh()
+
+        self.assertEqual(models.MaterializedRelatedView.objects.count(), 1,
+            'Materialized view should have updated')
