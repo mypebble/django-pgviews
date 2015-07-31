@@ -16,6 +16,22 @@ This project will eventually be superseded by the work being done on
 [pg-views]: http://www.postgresql.org/docs/9.1/static/sql-createview.html
 [django-contrib-docs]: https://docs.djangoproject.com/en/dev/ref/contrib/postgres/
 
+Installation
+------------
+
+Install via pip:
+
+    pip install django-pgviews
+
+Add to installed applications in settings.py:
+
+```python
+INSTALLED_APPS = (
+  # ...
+  'django_pgviews',
+)
+```
+
 Examples
 -------
 
