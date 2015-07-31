@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-LONG_DESCRIPTION = None
+LONG_DESCRIPTION = ''
 try:
     LONG_DESCRIPTION = open('README.md').read()
 except:
