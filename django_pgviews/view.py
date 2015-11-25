@@ -6,7 +6,7 @@ import logging
 import re
 
 from django.core import exceptions
-from django.db import connection, transaction
+from django.db import connection
 from django.db.models.query import QuerySet
 from django.db import models
 import psycopg2
@@ -43,19 +43,22 @@ def hasfield(model_cls, field_name):
 # Format: (app_label, model_name): {view_cls: [field_name, ...]}
 _DEFERRED_PROJECTIONS = collections.defaultdict(
     lambda: collections.defaultdict(list))
+
+
 def realize_deferred_projections(sender, *args, **kwargs):
     """Project any fields which were deferred pending model preparation."""
     app_label = sender._meta.app_label
     model_name = sender.__name__.lower()
     pending = _DEFERRED_PROJECTIONS.pop((app_label, model_name), {})
-    for view_cls, field_names in pending.iteritems():
+    for view_cls, field_names in pending.items():
         field_instances = get_fields_by_name(sender, *field_names)
-        for name, field in field_instances.iteritems():
+        for name, field in field_instances.items():
             # Only assign the field if the view does not already have an
             # attribute or explicitly-defined field with that name.
             if hasattr(view_cls, name) or hasfield(view_cls, name):
                 continue
             copy.copy(field).contribute_to_class(view_cls, name)
+
 models.signals.class_prepared.connect(realize_deferred_projections)
 
 
@@ -69,10 +72,11 @@ def create_views(models_module, update=True, force=False):
             continue
 
         try:
-            created = create_view(connection, view_cls._meta.db_table,
-                                  view_cls.sql, update=update, force=force,
-                                  materialized=isinstance(view_cls(), MaterializedView))
-        except Exception, exc:
+            materialized = isinstance(view_cls(), MaterializedView)
+            created = create_view(
+                connection, view_cls._meta.db_table, view_cls.sql,
+                update=update, force=force, materialized=materialized)
+        except Exception as exc:
             exc.view_cls = view_cls
             exc.python_name = models_module.__name__ + '.' + name
             raise
@@ -98,17 +102,22 @@ def create_view(connection, view_name, view_query, update=True, force=False,
     try:
         force_required = False
         # Determine if view already exists.
-        cursor.execute('SELECT COUNT(*) FROM pg_catalog.pg_class WHERE relname = %s;',
-                       [view_name])
+        cursor.execute(
+            'SELECT COUNT(*) FROM pg_catalog.pg_class WHERE relname = %s;',
+            [view_name])
         view_exists = cursor.fetchone()[0] > 0
         if view_exists and not update:
             return 'EXISTS'
         elif view_exists:
-            # Detect schema conflict by copying the original view, attempting to
-            # update this copy, and detecting errors.
-            cursor.execute('CREATE TEMPORARY VIEW check_conflict AS SELECT * FROM {0};'.format(view_name))
+            # Detect schema conflict by copying the original view, attempting
+            # to update this copy, and detecting errors.
+            cursor.execute(
+                'CREATE TEMPORARY VIEW check_conflict AS '
+                'SELECT * FROM {0};'.format(view_name))
             try:
-                cursor.execute('CREATE OR REPLACE TEMPORARY VIEW check_conflict AS {0};'.format(view_query))
+                cursor.execute(
+                    'CREATE OR REPLACE TEMPORARY VIEW check_conflict '
+                    'AS {0};'.format(view_query))
             except psycopg2.ProgrammingError:
                 force_required = True
                 cursor.connection.rollback()
@@ -116,15 +125,21 @@ def create_view(connection, view_name, view_query, update=True, force=False,
                 cursor.execute('DROP VIEW IF EXISTS check_conflict;')
 
         if materialized:
-            cursor.execute('DROP MATERIALIZED VIEW IF EXISTS {0};'.format(view_name))
-            cursor.execute('CREATE MATERIALIZED VIEW {0} AS {1};'.format(view_name, view_query))
+            cursor.execute(
+                'DROP MATERIALIZED VIEW IF EXISTS {0};'.format(view_name))
+            cursor.execute(
+                'CREATE MATERIALIZED VIEW'
+                ' {0} AS {1};'.format(view_name, view_query))
             ret = view_exists and 'UPDATED' or 'CREATED'
         elif not force_required:
-            cursor.execute('CREATE OR REPLACE VIEW {0} AS {1};'.format(view_name, view_query))
+            cursor.execute(
+                'CREATE OR REPLACE VIEW '
+                '{0} AS {1};'.format(view_name, view_query))
             ret = view_exists and 'UPDATED' or 'CREATED'
         elif force:
             cursor.execute('DROP VIEW IF EXISTS {0};'.format(view_name))
-            cursor.execute('CREATE VIEW {0} AS {1};'.format(view_name, view_query))
+            cursor.execute(
+                'CREATE VIEW {0} AS {1};'.format(view_name, view_query))
             ret = 'FORCED'
         else:
             ret = 'FORCE_REQUIRED'
@@ -146,7 +161,7 @@ def clear_views(models_module):
             cleared = clear_view(
                 connection, view_cls._meta.db_table,
                 materialized=isinstance(view_cls(), MaterializedView))
-        except Exception, exc:
+        except Exception as exc:
             exc.view_cls = view_cls
             exc.python_name = models_module.__name__ + '.' + name
             raise
@@ -162,7 +177,8 @@ def clear_view(connection, view_name, materialized=False):
     cursor = cursor_wrapper.cursor
     try:
         if materialized:
-            cursor.execute('DROP MATERIALIZED VIEW IF EXISTS {0}'.format(view_name))
+            cursor.execute(
+                'DROP MATERIALIZED VIEW IF EXISTS {0}'.format(view_name))
         else:
             cursor.execute('DROP VIEW IF EXISTS {0}'.format(view_name))
     finally:
@@ -200,8 +216,6 @@ class View(models.Model):
                 _realise_projections(app_label, model_name)
 
             return view_cls
-
-
 
     __metaclass__ = ViewMeta
 
