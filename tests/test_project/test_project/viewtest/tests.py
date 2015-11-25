@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.db import connection
 from django.test import TestCase
 
-import .models
+from .models import MaterializedRelatedView, Superusers, SimpleUser, TestModel
 
 
 class ViewTestCase(TestCase):
@@ -47,7 +47,7 @@ class ViewTestCase(TestCase):
         foo_user.set_password('blah')
         foo_user.save()
 
-        foo_superuser = models.Superusers.objects.get(username='foo')
+        foo_superuser = Superusers.objects.get(username='foo')
 
         self.assertEqual(foo_user.id, foo_superuser.id)
         self.assertEqual(foo_user.password, foo_superuser.password)
@@ -60,7 +60,7 @@ class ViewTestCase(TestCase):
         foo_user.set_password('blah')
         foo_user.save()
 
-        foo_simple = models.SimpleUser.objects.get(username='foo')
+        foo_simple = SimpleUser.objects.get(username='foo')
 
         self.assertEqual(foo_simple.username, foo_user.username)
         self.assertEqual(foo_simple.password, foo_user.password)
@@ -69,7 +69,7 @@ class ViewTestCase(TestCase):
     def test_related_delete(self):
         """Test views do not interfere with deleting the models
         """
-        tm = models.TestModel()
+        tm = TestModel()
         tm.name = "Bob"
         tm.save()
         tm.delete()
@@ -77,17 +77,17 @@ class ViewTestCase(TestCase):
     def test_materialized_view(self):
         """Test a materialized view works correctly
         """
-        self.assertEqual(models.MaterializedRelatedView.objects.count(), 0,
+        self.assertEqual(MaterializedRelatedView.objects.count(), 0,
             'Materialized view should not have anything')
 
-        tm = models.TestModel()
+        tm = TestModel()
         tm.name = "Bob"
         tm.save()
 
-        self.assertEqual(models.MaterializedRelatedView.objects.count(), 0,
+        self.assertEqual(MaterializedRelatedView.objects.count(), 0,
             'Materialized view should not have anything')
 
-        models.MaterializedRelatedView.refresh()
+        MaterializedRelatedView.refresh()
 
-        self.assertEqual(models.MaterializedRelatedView.objects.count(), 1,
+        self.assertEqual(MaterializedRelatedView.objects.count(), 1,
             'Materialized view should have updated')
