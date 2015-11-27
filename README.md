@@ -16,6 +16,7 @@ This project will eventually be superseded by the work being done on
 [pg-views]: http://www.postgresql.org/docs/9.1/static/sql-createview.html
 [django-contrib-docs]: https://docs.djangoproject.com/en/dev/ref/contrib/postgres/
 
+
 Installation
 ------------
 
@@ -50,7 +51,8 @@ class Customer(models.Model):
         app_label = 'myapp'
 
 class PreferredCustomer(pg.View):
-    projection = ['myapp.Customer.*']
+    projection = ['myapp.Customer.*',]
+    dependencies = ['myapp.Customer',]
     sql = """SELECT * FROM myapp_customer WHERE is_preferred = TRUE;"""
 
     class Meta:
