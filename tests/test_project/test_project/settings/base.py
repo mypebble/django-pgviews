@@ -150,7 +150,10 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
     },
     'loggers': {
         'django.request': {
@@ -158,5 +161,9 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'django_pgviews': {
+            'level': 'INFO',
+            'handlers': ['console']
+        }
     }
 }
