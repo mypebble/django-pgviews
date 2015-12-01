@@ -1,26 +1,11 @@
+import logging
+
 from django.apps import apps
 from django.db import connection
 
 from django_pgviews.view import create_view, View, MaterializedView
 
-import logging
-
 log = logging.getLogger('django_pgviews.sync_pgviews')
-
-counter = 0
-
-
-def sync_pgviews(sender, app_config, **kwargs):
-    """Forcibly sync the views.
-    """
-    global counter
-    counter = counter + 1
-    total = len([a for a in apps.get_app_configs() if a.models_module is not None])
-    
-    if counter == total:
-        log.info('All applications have migrated, time to sync')
-        vs = ViewSyncer()
-        vs.run(force=True, update=True)
 
 
 class ViewSyncer(object):
