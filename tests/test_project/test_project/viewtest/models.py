@@ -11,6 +11,7 @@ class TestModel(models.Model):
 
 class Superusers(django_pgviews.View):
     projection = ['auth.User.*']
+    dependencies = ('viewtest.RelatedView',)
     sql = """SELECT * FROM auth_user WHERE is_superuser = TRUE;"""
 
 

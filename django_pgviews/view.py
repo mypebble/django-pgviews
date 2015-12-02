@@ -9,6 +9,7 @@ from django.core import exceptions
 from django.db import connection, transaction
 from django.db.models.query import QuerySet
 from django.db import models
+from django.apps import apps
 import psycopg2
 
 from django_pgviews.db import get_fields_by_name
@@ -177,7 +178,13 @@ class View(models.Model):
     class ViewMeta(models.base.ModelBase):
 
         def __new__(metacls, name, bases, attrs):
+            '''Deal with all of the meta attributes, removing any Django does not want
+            '''
+            # Get attributes before Django
+            dependencies = attrs.pop('dependencies', [])
             projection = attrs.pop('projection', [])
+
+            # Get projection
             deferred_projections = []
             for field_name in projection:
                 if isinstance(field_name, models.Field):
@@ -192,7 +199,10 @@ class View(models.Model):
                     raise TypeError("Unrecognized field specifier: %r" %
                                     field_name)
             view_cls = models.base.ModelBase.__new__(metacls, name, bases,
-                                                     attrs)
+                                attrs)
+
+            # Get dependencies
+            setattr(view_cls, '_dependencies', dependencies)
             for app_label, model_name, field_name in deferred_projections:
                 model_spec = (app_label, model_name.lower())
 
@@ -215,7 +225,7 @@ def _realise_projections(app_label, model_name):
     realise_deferred_projections() if it has.
     """
     try:
-        model_cls = models.get_model(app_label, model_name)
+        model_cls = apps.get_model(app_label, model_name)
     except exceptions.AppRegistryNotReady:
         return
     if model_cls is not None:
@@ -279,6 +289,7 @@ class MaterializedView(View):
     class Meta:
         abstract = True
         managed = False
+    __metaclass__ = View.ViewMeta
 
 
 class ReadOnlyMaterializedView(MaterializedView):
@@ -290,3 +301,4 @@ class ReadOnlyMaterializedView(MaterializedView):
     class Meta:
         abstract = True
         managed = False
+    __metaclass__ = View.ViewMeta
