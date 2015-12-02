@@ -1,5 +1,5 @@
-SQL Views for Postgres
-======================
+# SQL Views for Postgres
+
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/mypebble/django-pgviews?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Circle CI](https://circleci.com/gh/mypebble/django-pgviews.png)](https://circleci.com/gh/mypebble/django-pgviews)
 
@@ -17,8 +17,7 @@ This project will eventually be superseded by the work being done on
 [django-contrib-docs]: https://docs.djangoproject.com/en/dev/ref/contrib/postgres/
 
 
-Installation
-------------
+## Installation
 
 Install via pip:
 
@@ -33,8 +32,7 @@ INSTALLED_APPS = (
 )
 ```
 
-Examples
--------
+## Examples
 
 ```python
 from django.db import models
@@ -52,7 +50,7 @@ class Customer(models.Model):
 
 class PreferredCustomer(pg.View):
     projection = ['myapp.Customer.*',]
-    dependencies = ['myapp.Customer',]
+    dependencies = ['myapp.OtherView',]
     sql = """SELECT * FROM myapp_customer WHERE is_preferred = TRUE;"""
 
     class Meta:
@@ -91,35 +89,30 @@ class PreferredCustomer(pg.View):
     sql = VIEW_SQL
 ```
 
-Django Compatibility
---------------------
+## Features
 
-<table>
-  <thead>
-    <tr>
-      <th>Django Version</th>
-      <th>Django-PGView Version</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>1.4 and down</td>
-      <td>Unsupported</td>
-    </tr>
-    <tr>
-      <td>1.5</td>
-      <td>0.0.1</td>
-    </tr>
-    <tr>
-      <td>1.6</td>
-      <td>0.0.3</td>
-    </tr>
-    <tr>
-      <td>1.7</td>
-      <td>0.0.4</td>
-    </tr>
-  </tbody>
-</table>
+### Dependencies
+
+You can specify other views you depend on. This ensures the other views
+are installed beforehand.
+
+Note: Views are synced after the Django application has migrated and adding
+models to the dependency list will cause syncing to fail.
+
+Example:
+
+```python
+import django_postgres as pg
+
+class PreferredCustomer(pg.View):
+    dependencies = ['myapp.OtherView',]
+    sql = """SELECT * FROM myapp_customer WHERE is_preferred = TRUE;"""
+
+    class Meta:
+      app_label = 'myapp'
+      db_table = 'myapp_preferredcustomer'
+      managed = False
+```
 
 ### Materialized Views
 
@@ -158,6 +151,35 @@ class PreferredCustomer(pg.MaterializedView):
 def customer_saved(sender, action=None, instance=None, **kwargs):
     PreferredCustomer.refresh()
 ```
+
+## Django Compatibility
+
+<table>
+  <thead>
+    <tr>
+      <th>Django Version</th>
+      <th>Django-PGView Version</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1.4 and down</td>
+      <td>Unsupported</td>
+    </tr>
+    <tr>
+      <td>1.5</td>
+      <td>0.0.1</td>
+    </tr>
+    <tr>
+      <td>1.6</td>
+      <td>0.0.3</td>
+    </tr>
+    <tr>
+      <td>1.7</td>
+      <td>0.0.4</td>
+    </tr>
+  </tbody>
+</table>
 
 ### Django 1.7 Note
 
