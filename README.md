@@ -37,7 +37,7 @@ INSTALLED_APPS = (
 ```python
 from django.db import models
 
-import django_postgres as pg
+import django_postgres.view as pg
 
 
 class Customer(models.Model):
@@ -74,7 +74,7 @@ To create all your views, run ``python manage.py sync_pgviews``
 You can also specify field names, which will map onto fields in your View:
 
 ```python
-import django_postgres as pg
+import django_postgres.view as pg
 
 
 VIEW_SQL = """
@@ -102,7 +102,7 @@ models to the dependency list will cause syncing to fail.
 Example:
 
 ```python
-import django_postgres as pg
+import django_postgres.view as pg
 
 class PreferredCustomer(pg.View):
     dependencies = ['myapp.OtherView',]
@@ -127,7 +127,7 @@ and call the refresh function.
 Example:
 
 ```python
-import django_postgres as pg
+import django_postgres.view as pg
 
 
 VIEW_SQL = """
@@ -186,3 +186,7 @@ def customer_saved(sender, action=None, instance=None, **kwargs):
 Django 1.7 changed how models are loaded so that it's no longer possible to do
 `sql = str(User.objects.all().query)` because the dependent models aren't
 yet loaded by Django.
+
+### Django 1.9 Note
+
+You now have to use the `.view` module directly.

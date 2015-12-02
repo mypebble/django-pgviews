@@ -44,3 +44,6 @@ pip-log.txt
 # Temporary files
 *~
 .*.swp
+
+.idea
+pip-selfcheck.json
