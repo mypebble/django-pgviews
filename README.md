@@ -1,5 +1,5 @@
-SQL Views for Postgres
-======================
+# SQL Views for Postgres
+
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/mypebble/django-pgviews?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Circle CI](https://circleci.com/gh/mypebble/django-pgviews.png)](https://circleci.com/gh/mypebble/django-pgviews)
 
@@ -17,8 +17,7 @@ This project will eventually be superseded by the work being done on
 [django-contrib-docs]: https://docs.djangoproject.com/en/dev/ref/contrib/postgres/
 
 
-Installation
-------------
+## Installation
 
 Install via pip:
 
@@ -33,13 +32,12 @@ INSTALLED_APPS = (
 )
 ```
 
-Examples
--------
+## Examples
 
 ```python
 from django.db import models
 
-import django_postgres as pg
+import django_postgres.view as pg
 
 
 class Customer(models.Model):
@@ -52,7 +50,7 @@ class Customer(models.Model):
 
 class PreferredCustomer(pg.View):
     projection = ['myapp.Customer.*',]
-    dependencies = ['myapp.Customer',]
+    dependencies = ['myapp.OtherView',]
     sql = """SELECT * FROM myapp_customer WHERE is_preferred = TRUE;"""
 
     class Meta:
@@ -76,7 +74,7 @@ To create all your views, run ``python manage.py sync_pgviews``
 You can also specify field names, which will map onto fields in your View:
 
 ```python
-import django_postgres as pg
+import django_postgres.view as pg
 
 
 VIEW_SQL = """
@@ -91,8 +89,70 @@ class PreferredCustomer(pg.View):
     sql = VIEW_SQL
 ```
 
-Django Compatibility
---------------------
+## Features
+
+### Dependencies
+
+You can specify other views you depend on. This ensures the other views
+are installed beforehand.
+
+Note: Views are synced after the Django application has migrated and adding
+models to the dependency list will cause syncing to fail.
+
+Example:
+
+```python
+import django_postgres.view as pg
+
+class PreferredCustomer(pg.View):
+    dependencies = ['myapp.OtherView',]
+    sql = """SELECT * FROM myapp_customer WHERE is_preferred = TRUE;"""
+
+    class Meta:
+      app_label = 'myapp'
+      db_table = 'myapp_preferredcustomer'
+      managed = False
+```
+
+### Materialized Views
+
+Postgres 9.3 and up supports [materialized views](http://www.postgresql.org/docs/current/static/sql-creatematerializedview.html)
+which allow you to cache the results of views, potentially allowing them
+to load faster.
+
+However, you do need to manually refresh the view. To do this automatically,
+you can attach [signals](https://docs.djangoproject.com/en/1.8/ref/signals/)
+and call the refresh function.
+
+Example:
+
+```python
+import django_postgres.view as pg
+
+
+VIEW_SQL = """
+    SELECT name, post_code FROM myapp_customer WHERE is_preferred = TRUE
+"""
+
+class Customer(models.Model):
+    name = models.CharField(max_length=100)
+    post_code = models.CharField(max_length=20)
+    is_preferred = models.BooleanField(default=True)
+
+
+class PreferredCustomer(pg.MaterializedView):
+    name = models.CharField(max_length=100)
+    post_code = models.CharField(max_length=20)
+
+    sql = VIEW_SQL
+
+
+@receiver(post_save, sender=Customer)
+def customer_saved(sender, action=None, instance=None, **kwargs):
+    PreferredCustomer.refresh()
+```
+
+## Django Compatibility
 
 <table>
   <thead>
@@ -118,49 +178,19 @@ Django Compatibility
       <td>1.7</td>
       <td>0.0.4</td>
     </tr>
+    <tr>
+      <td>1.9</td>
+      <td>0.0.6</td>
+    </tr>
   </tbody>
 </table>
-
-### Materialized Views
-
-Postgres 9.3 and up supports [materialized views](http://www.postgresql.org/docs/current/static/sql-creatematerializedview.html)
-which allow you to cache the results of views, potentially allowing them
-to load faster.
-
-However, you do need to manually refresh the view. To do this automatically,
-you can attach [signals](https://docs.djangoproject.com/en/1.8/ref/signals/)
-and call the refresh function.
-
-Example:
-
-```python
-import django_postgres as pg
-
-
-VIEW_SQL = """
-    SELECT name, post_code FROM myapp_customer WHERE is_preferred = TRUE
-"""
-
-class Customer(models.Model):
-    name = models.CharField(max_length=100)
-    post_code = models.CharField(max_length=20)
-    is_preferred = models.BooleanField(default=True)
-
-
-class PreferredCustomer(pg.MaterializedView):
-    name = models.CharField(max_length=100)
-    post_code = models.CharField(max_length=20)
-
-    sql = VIEW_SQL
-
-
-@receiver(post_save, sender=Customer)
-def customer_saved(sender, action=None, instance=None, **kwargs):
-    PreferredCustomer.refresh()
-```
 
 ### Django 1.7 Note
 
 Django 1.7 changed how models are loaded so that it's no longer possible to do
 `sql = str(User.objects.all().query)` because the dependent models aren't
 yet loaded by Django.
+
+### Django 1.9 Note
+
+You now have to use the `.view` module directly.

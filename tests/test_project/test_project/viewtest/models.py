@@ -1,6 +1,6 @@
 from django.db import models
 
-import django_pgviews
+import django_pgviews.view as django_pgviews
 
 
 class TestModel(models.Model):
