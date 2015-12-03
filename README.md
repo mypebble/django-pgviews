@@ -178,6 +178,10 @@ def customer_saved(sender, action=None, instance=None, **kwargs):
       <td>1.7</td>
       <td>0.0.4</td>
     </tr>
+    <tr>
+      <td>1.9</td>
+      <td>0.0.6</td>
+    </tr>
   </tbody>
 </table>
 

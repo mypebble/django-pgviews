@@ -22,6 +22,8 @@ class ViewConfig(apps.AppConfig):
         
         if self.counter == total:
             log.info('All applications have migrated, time to sync')
+            # Import here otherwise Django doesn't start properly
+            # (models in app init are not allowed)
             from .models import ViewSyncer
             vs = ViewSyncer()
             vs.run(force=True, update=True) 
