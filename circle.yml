@@ -1,10 +1,14 @@
 dependencies:
-    post:
-        - python setup.py develop
-        - pip install -r tests/requirements.txt
+  post:
+    - python setup.py develop
+    - pip install -r tests/requirements.txt
 
 test:
-    override:
-        - cd tests/test_project && python manage.py test test_project.viewtest --settings=test_project.settings.ci
-        - pip uninstall -y django && pip install django==1.8
-        - cd tests/test_project && python manage.py test test_project.viewtest --settings=test_project.settings.ci
+  override:
+    - cd tests/test_project && python manage.py test test_project.viewtest --settings=test_project.settings.ci
+    - pip uninstall -y django && pip install django==1.8
+    - cd tests/test_project && python manage.py test test_project.viewtest --settings=test_project.settings.ci
+
+notify:
+  webhooks:
+    - url: https://webhooks.gitter.im/e/094571daa52845626f62
