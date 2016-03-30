@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.db import connection
 from django.test import TestCase
 
-import models
+from . import models
 
 
 class ViewTestCase(TestCase):
