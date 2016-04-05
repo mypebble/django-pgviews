@@ -3,9 +3,18 @@ from contextlib import closing
 from django.contrib import auth
 from django.core.management import call_command
 from django.db import connection
+from django.db.models import signals
+from django.dispatch import receiver
 from django.test import TestCase
 
 from . import models
+
+
+@receiver(signals.post_migrate)
+def create_test_schema(sender, app_config, **kwargs):
+        command = 'CREATE SCHEMA IF NOT EXISTS {};'.format('test_schema')
+        with connection.cursor() as cursor:
+            cursor.execute(command)
 
 
 class ViewTestCase(TestCase):
@@ -28,13 +37,25 @@ class ViewTestCase(TestCase):
             count, = cur.fetchone()
             self.assertEqual(count, 1)
 
+            cur.execute('''SELECT COUNT(*) FROM information_schema.views
+                        WHERE table_schema = 'test_schema';''')
+
+            count, = cur.fetchone()
+            self.assertEqual(count, 1)
+
     def test_clear_views(self):
-        """Check the PG View table to see that th eviews were removed.
+        """Check the PG View table to see that the views were removed.
         """
         call_command('clear_pgviews', *[], **{})
         with closing(connection.cursor()) as cur:
             cur.execute('''SELECT COUNT(*) FROM pg_views
                         WHERE viewname LIKE 'viewtest_%';''')
+
+            count, = cur.fetchone()
+            self.assertEqual(count, 0)
+
+            cur.execute('''SELECT COUNT(*) FROM information_schema.views
+                        WHERE table_schema = 'test_schema';''')
 
             count, = cur.fetchone()
             self.assertEqual(count, 0)

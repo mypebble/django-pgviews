@@ -152,6 +152,23 @@ def customer_saved(sender, action=None, instance=None, **kwargs):
     PreferredCustomer.refresh()
 ```
 
+### Custom Schema
+
+You can define any table name you wish for your views. They can even live inside your own custom
+[PostgreSQL schema](http://www.postgresql.org/docs/current/static/ddl-schemas.html).
+
+```python
+from django_pgviews import view as pg
+
+
+class PreferredCustomer(pg.View):
+    sql = """SELECT * FROM myapp_customer WHERE is_preferred = TRUE;"""
+
+    class Meta:
+      db_table = 'my_custom_schema.preferredcustomer'
+      managed = False
+```
+
 ## Django Compatibility
 
 <table>

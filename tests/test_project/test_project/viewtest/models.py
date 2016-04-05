@@ -36,3 +36,12 @@ class RelatedView(django_pgviews.ReadOnlyView):
 class MaterializedRelatedView(django_pgviews.ReadOnlyMaterializedView):
     sql = """SELECT id AS model_id, id FROM viewtest_testmodel"""
     model = models.ForeignKey(TestModel)
+
+
+class CustomSchemaView(django_pgviews.ReadOnlyView):
+    sql = """SELECT id AS model_id, id FROM viewtest_testmodel"""
+    model = models.ForeignKey(TestModel)
+
+    class Meta:
+        managed = False
+        db_table = 'test_schema.my_custom_view'
