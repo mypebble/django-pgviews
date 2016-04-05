@@ -76,13 +76,21 @@ def create_view(connection, view_name, view_query, update=True, force=False,
     (default: False) controls whether or not to drop the old view and create
     the new one.
     """
+
+    if '.' in view_name:
+        vschema, vname = view_name.split('.', 1)
+    else:
+        vschema, vname = 'public', view_name
+
     cursor_wrapper = connection.cursor()
     cursor = cursor_wrapper.cursor
     try:
         force_required = False
         # Determine if view already exists.
-        cursor.execute('SELECT COUNT(*) FROM pg_catalog.pg_class WHERE relname = %s;',
-                       [view_name])
+        cursor.execute(
+            'SELECT COUNT(*) FROM information_schema.views WHERE table_schema = %s and table_name = %s;',
+            [vschema, vname]
+        )
         view_exists = cursor.fetchone()[0] > 0
         if view_exists and not update:
             return 'EXISTS'
