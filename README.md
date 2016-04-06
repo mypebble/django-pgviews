@@ -211,3 +211,7 @@ yet loaded by Django.
 ### Django 1.9 Note
 
 You now have to use the `.view` module directly.
+
+## Python 3 Support
+
+Django PGViews supports Python 3 in versions 0.0.7 and above.
