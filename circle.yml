@@ -8,6 +8,8 @@ test:
     - cd tests/test_project && python manage.py test test_project.viewtest --settings=test_project.settings.ci
     - pip uninstall -y django && pip install django==1.8
     - cd tests/test_project && python manage.py test test_project.viewtest --settings=test_project.settings.ci
+    - pyenv global 3.5.0
+    - cd tests/test_project && python manage.py test test_project.viewtest --settings=test_project.settings.ci
 
 notify:
   webhooks:

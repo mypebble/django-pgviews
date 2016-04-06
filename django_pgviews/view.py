@@ -6,9 +6,10 @@ import logging
 import re
 
 from django.core import exceptions
-from django.db import connection, transaction
+from django.db import connection
 from django.db.models.query import QuerySet
 from django.db import models
+from django.utils import six
 from django.apps import apps
 import psycopg2
 
@@ -44,14 +45,16 @@ def hasfield(model_cls, field_name):
 # Format: (app_label, model_name): {view_cls: [field_name, ...]}
 _DEFERRED_PROJECTIONS = collections.defaultdict(
     lambda: collections.defaultdict(list))
+
+
 def realize_deferred_projections(sender, *args, **kwargs):
     """Project any fields which were deferred pending model preparation."""
     app_label = sender._meta.app_label
     model_name = sender.__name__.lower()
     pending = _DEFERRED_PROJECTIONS.pop((app_label, model_name), {})
-    for view_cls, field_names in pending.iteritems():
+    for view_cls, field_names in pending.items():
         field_instances = get_fields_by_name(sender, *field_names)
-        for name, field in field_instances.iteritems():
+        for name, field in field_instances.items():
             # Only assign the field if the view does not already have an
             # attribute or explicitly-defined field with that name.
             if hasattr(view_cls, name) or hasfield(view_cls, name):
@@ -73,13 +76,21 @@ def create_view(connection, view_name, view_query, update=True, force=False,
     (default: False) controls whether or not to drop the old view and create
     the new one.
     """
+
+    if '.' in view_name:
+        vschema, vname = view_name.split('.', 1)
+    else:
+        vschema, vname = 'public', view_name
+
     cursor_wrapper = connection.cursor()
     cursor = cursor_wrapper.cursor
     try:
         force_required = False
         # Determine if view already exists.
-        cursor.execute('SELECT COUNT(*) FROM pg_catalog.pg_class WHERE relname = %s;',
-                       [view_name])
+        cursor.execute(
+            'SELECT COUNT(*) FROM information_schema.views WHERE table_schema = %s and table_name = %s;',
+            [vschema, vname]
+        )
         view_exists = cursor.fetchone()[0] > 0
         if view_exists and not update:
             return 'EXISTS'
@@ -130,47 +141,45 @@ def clear_view(connection, view_name, materialized=False):
     return u'DROPPED'.format(view=view_name)
 
 
-class View(models.Model):
-    """Helper for exposing Postgres views as Django models.
-    """
+class ViewMeta(models.base.ModelBase):
+    def __new__(metacls, name, bases, attrs):
+        """Deal with all of the meta attributes, removing any Django does not want
+        """
+        # Get attributes before Django
+        dependencies = attrs.pop('dependencies', [])
+        projection = attrs.pop('projection', [])
 
-    class ViewMeta(models.base.ModelBase):
-
-        def __new__(metacls, name, bases, attrs):
-            '''Deal with all of the meta attributes, removing any Django does not want
-            '''
-            # Get attributes before Django
-            dependencies = attrs.pop('dependencies', [])
-            projection = attrs.pop('projection', [])
-
-            # Get projection
-            deferred_projections = []
-            for field_name in projection:
-                if isinstance(field_name, models.Field):
-                    attrs[field_name.name] = copy.copy(field_name)
-                elif isinstance(field_name, basestring):
-                    match = FIELD_SPEC_RE.match(field_name)
-                    if not match:
-                        raise TypeError("Unrecognized field specifier: %r" %
-                                        field_name)
-                    deferred_projections.append(match.groups())
-                else:
+        # Get projection
+        deferred_projections = []
+        for field_name in projection:
+            if isinstance(field_name, models.Field):
+                attrs[field_name.name] = copy.copy(field_name)
+            elif isinstance(field_name, six.string_types):
+                match = FIELD_SPEC_RE.match(field_name)
+                if not match:
                     raise TypeError("Unrecognized field specifier: %r" %
                                     field_name)
-            view_cls = models.base.ModelBase.__new__(metacls, name, bases,
-                                attrs)
+                deferred_projections.append(match.groups())
+            else:
+                raise TypeError("Unrecognized field specifier: %r" %
+                                field_name)
+        view_cls = models.base.ModelBase.__new__(metacls, name, bases, attrs)
 
-            # Get dependencies
-            setattr(view_cls, '_dependencies', dependencies)
-            for app_label, model_name, field_name in deferred_projections:
-                model_spec = (app_label, model_name.lower())
+        # Get dependencies
+        setattr(view_cls, '_dependencies', dependencies)
+        for app_label, model_name, field_name in deferred_projections:
+            model_spec = (app_label, model_name.lower())
 
-                _DEFERRED_PROJECTIONS[model_spec][view_cls].append(field_name)
-                _realise_projections(app_label, model_name)
+            _DEFERRED_PROJECTIONS[model_spec][view_cls].append(field_name)
+            _realise_projections(app_label, model_name)
 
-            return view_cls
+        return view_cls
 
-    __metaclass__ = ViewMeta
+
+class View(six.with_metaclass(ViewMeta, models.Model)):
+    """Helper for exposing Postgres views as Django models.
+    """
+    _deferred = False
 
     class Meta:
         abstract = True
