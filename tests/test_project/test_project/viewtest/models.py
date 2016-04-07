@@ -11,7 +11,6 @@ class TestModel(models.Model):
 
 class Superusers(django_pgviews.View):
     projection = ['auth.User.*']
-    dependencies = ('viewtest.RelatedView',)
     sql = """SELECT * FROM auth_user WHERE is_superuser = TRUE;"""
 
 
@@ -36,6 +35,16 @@ class RelatedView(django_pgviews.ReadOnlyView):
 class MaterializedRelatedView(django_pgviews.ReadOnlyMaterializedView):
     sql = """SELECT id AS model_id, id FROM viewtest_testmodel"""
     model = models.ForeignKey(TestModel)
+
+
+class DependantView(django_pgviews.ReadOnlyView):
+    dependencies = ('viewtest.RelatedView',)
+    sql = """SELECT model_id from viewtest_relatedview;"""
+
+
+class DependantMaterializedView(django_pgviews.ReadOnlyMaterializedView):
+    dependencies = ('viewtest.MaterializedRelatedView',)
+    sql = """SELECT model_id from viewtest_materializedrelatedview;"""
 
 
 class CustomSchemaView(django_pgviews.ReadOnlyView):

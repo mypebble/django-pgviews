@@ -29,13 +29,13 @@ class ViewTestCase(TestCase):
                         WHERE viewname LIKE 'viewtest_%';''')
 
             count, = cur.fetchone()
-            self.assertEqual(count, 3)
+            self.assertEqual(count, 4)
 
             cur.execute('''SELECT COUNT(*) FROM pg_matviews
                         WHERE matviewname LIKE 'viewtest_%';''')
 
             count, = cur.fetchone()
-            self.assertEqual(count, 1)
+            self.assertEqual(count, 2)
 
             cur.execute('''SELECT COUNT(*) FROM information_schema.views
                         WHERE table_schema = 'test_schema';''')
@@ -112,3 +112,71 @@ class ViewTestCase(TestCase):
 
         self.assertEqual(models.MaterializedRelatedView.objects.count(), 1,
             'Materialized view should have updated')
+
+
+class DependantViewTestCase(TestCase):
+    def test_sync_depending_views(self):
+        """Test the sync_pgviews command for views that depend on other views.
+
+        This test drops `viewtest_dependantview` and its dependencies
+        and recreates them manually, thereby simulating an old state
+        of the views in the db before changes to the view model's sql is made.
+        Then we sync the views again and verify that everything was updated.
+        """
+
+        with closing(connection.cursor()) as cur:
+            cur.execute("DROP VIEW viewtest_relatedview CASCADE;")
+
+            cur.execute("""CREATE VIEW viewtest_relatedview as
+                        SELECT id AS model_id, name FROM viewtest_testmodel;""")
+
+            cur.execute("""CREATE VIEW viewtest_dependantview as
+                        SELECT name from viewtest_relatedview;""")
+
+            cur.execute("""SELECT name from viewtest_relatedview;""")
+            cur.execute("""SELECT name from viewtest_dependantview;""")
+
+        call_command('sync_pgviews', '--force')
+
+        with closing(connection.cursor()) as cur:
+            cur.execute("""SELECT COUNT(*) FROM pg_views
+                        WHERE viewname LIKE 'viewtest_%';""")
+
+            count, = cur.fetchone()
+            self.assertEqual(count, 4)
+
+            with self.assertRaises(Exception):
+                cur.execute("""SELECT name from viewtest_relatedview;""")
+
+            with self.assertRaises(Exception):
+                cur.execute("""SELECT name from viewtest_dependantview;""")
+
+    def test_sync_depending_materialized_views(self):
+        """Test the sync_pgviews command for views that depend on other materialized views."""
+
+        with closing(connection.cursor()) as cur:
+            cur.execute("DROP MATERIALIZED VIEW viewtest_materializedrelatedview CASCADE;")
+
+            cur.execute("""CREATE MATERIALIZED VIEW viewtest_materializedrelatedview as
+                        SELECT id AS model_id, name FROM viewtest_testmodel;""")
+
+            cur.execute("""CREATE MATERIALIZED VIEW viewtest_dependantmaterializedview as
+                        SELECT name from viewtest_materializedrelatedview;""")
+
+            cur.execute("""SELECT name from viewtest_materializedrelatedview;""")
+            cur.execute("""SELECT name from viewtest_dependantmaterializedview;""")
+
+        call_command('sync_pgviews', '--force')
+
+        with closing(connection.cursor()) as cur:
+            cur.execute("""SELECT COUNT(*) FROM pg_views
+                        WHERE viewname LIKE 'viewtest_%';""")
+
+            count, = cur.fetchone()
+            self.assertEqual(count, 4)
+
+            with self.assertRaises(Exception):
+                cur.execute("""SELECT name from viewtest_materializedrelatedview;""")
+
+            with self.assertRaises(Exception):
+                cur.execute("""SELECT name from viewtest_dependantmaterializedview;""")
