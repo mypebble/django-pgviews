@@ -107,14 +107,14 @@ def create_view(connection, view_name, view_query, update=True, force=False,
                 cursor.execute('DROP VIEW IF EXISTS check_conflict;')
 
         if materialized:
-            cursor.execute('DROP MATERIALIZED VIEW IF EXISTS {0};'.format(view_name))
+            cursor.execute('DROP MATERIALIZED VIEW IF EXISTS {0} CASCADE;'.format(view_name))
             cursor.execute('CREATE MATERIALIZED VIEW {0} AS {1};'.format(view_name, view_query))
             ret = view_exists and 'UPDATED' or 'CREATED'
         elif not force_required:
             cursor.execute('CREATE OR REPLACE VIEW {0} AS {1};'.format(view_name, view_query))
             ret = view_exists and 'UPDATED' or 'CREATED'
         elif force:
-            cursor.execute('DROP VIEW IF EXISTS {0};'.format(view_name))
+            cursor.execute('DROP VIEW IF EXISTS {0} CASCADE;'.format(view_name))
             cursor.execute('CREATE VIEW {0} AS {1};'.format(view_name, view_query))
             ret = 'FORCED'
         else:
@@ -133,9 +133,9 @@ def clear_view(connection, view_name, materialized=False):
     cursor = cursor_wrapper.cursor
     try:
         if materialized:
-            cursor.execute('DROP MATERIALIZED VIEW IF EXISTS {0}'.format(view_name))
+            cursor.execute('DROP MATERIALIZED VIEW IF EXISTS {0} CASCADE'.format(view_name))
         else:
-            cursor.execute('DROP VIEW IF EXISTS {0}'.format(view_name))
+            cursor.execute('DROP VIEW IF EXISTS {0} CASCADE'.format(view_name))
     finally:
         cursor_wrapper.close()
     return u'DROPPED'.format(view=view_name)
