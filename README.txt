@@ -7,15 +7,6 @@ Adds first-class support for `PostgreSQL
 Views <http://www.postgresql.org/docs/9.1/static/sql-createview.html>`__
 in the Django ORM
 
-This project is a fork of
-`django-postgres <https://github.com/zacharyvoase/django-postgres>`__
-with support for specific data types stripped out, in favour of focusing
-support on maintaining SQL View compatibility with the latest versions
-of Django.
-
-This project will eventually be superseded by the work being done on
-`django.contrib.postgres <https://docs.djangoproject.com/en/dev/ref/contrib/postgres/>`__
-
 Installation
 ------------
 
@@ -97,13 +88,27 @@ View:
 Features
 --------
 
+Updating Views
+~~~~~~~~~~~~~~
+
+Sometimes your models change and you need your Database Views to reflect
+the new data. Updating the View logic is as simple as modifying the
+underlying SQL and running:
+
+::
+
+    python manage.py sync_pgviews --force
+
+This will forcibly update any views that conflict with your new SQL.
+
 Dependencies
 ~~~~~~~~~~~~
 
 You can specify other views you depend on. This ensures the other views
-are installed beforehand.
+are installed beforehand. Using dependencies also ensures that your
+views get refreshed correctly when using ``sync_pgviews --force``.
 
-Note: Views are synced after the Django application has migrated and
+**Note:** Views are synced after the Django application has migrated and
 adding models to the dependency list will cause syncing to fail.
 
 Example:
