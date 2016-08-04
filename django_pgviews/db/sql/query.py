@@ -15,7 +15,7 @@ class NonQuotingQuery(query.Query):
         if using:
             connection = connections[using]
 
-        for alias, aggregate in self.aggregate_select.items():
-            connection.ops.check_aggregate_support(aggregate)
+        for alias, annotation in self.annotation_select.items():
+            connection.ops.check_expression_support(annotation)
 
         return compiler.NonQuotingCompiler(self, connection, using)
