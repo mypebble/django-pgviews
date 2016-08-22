@@ -1,16 +1,10 @@
 dependencies:
-  post:
-    - python setup.py develop
-    - pip install -r tests/requirements.txt
-
-test:
   override:
-    - cd tests/test_project && python manage.py test test_project.viewtest --settings=test_project.settings.ci
-    - pip uninstall -y django && pip install django==1.8
-    - cd tests/test_project && python manage.py test test_project.viewtest --settings=test_project.settings.ci
-    - pyenv global 3.5.0
-    - cd tests/test_project && python manage.py test test_project.viewtest --settings=test_project.settings.ci
-
+    - pip install tox tox-pyenv
+  post:
+    - pyenv global 2.7.10 3.4.3 3.5.0
+  pre:
+    - sudo apt-get install python3-dev -y
 notify:
   webhooks:
     - url: https://webhooks.gitter.im/e/094571daa52845626f62
