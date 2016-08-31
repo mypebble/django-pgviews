@@ -5,6 +5,7 @@ import copy
 import logging
 import re
 
+import django
 from django.core import exceptions
 from django.db import connection
 from django.db.models.query import QuerySet
@@ -163,6 +164,7 @@ class ViewMeta(models.base.ModelBase):
             else:
                 raise TypeError("Unrecognized field specifier: %r" %
                                 field_name)
+
         view_cls = models.base.ModelBase.__new__(metacls, name, bases, attrs)
 
         # Get dependencies
@@ -174,6 +176,19 @@ class ViewMeta(models.base.ModelBase):
             _realise_projections(app_label, model_name)
 
         return view_cls
+
+    def add_to_class(self, name, value):
+        if django.VERSION >= (1, 10) and name == '_base_manager':
+            return
+        super(ViewMeta, self).add_to_class(name, value)
+
+
+
+if django.VERSION >= (1, 10):
+    class BaseManagerMeta:
+        base_manager_name = 'objects'
+else:
+    BaseManagerMeta = object
 
 
 class View(six.with_metaclass(ViewMeta, models.Model)):
@@ -232,7 +247,7 @@ class ReadOnlyView(View):
     _base_manager = ReadOnlyViewManager()
     objects = ReadOnlyViewManager()
 
-    class Meta:
+    class Meta(BaseManagerMeta):
         abstract = True
         managed = False
 
@@ -263,6 +278,6 @@ class ReadOnlyMaterializedView(MaterializedView):
     _base_manager = ReadOnlyViewManager()
     objects = ReadOnlyViewManager()
 
-    class Meta:
+    class Meta(BaseManagerMeta):
         abstract = True
         managed = False
