@@ -201,7 +201,11 @@ class PreferredCustomer(pg.View):
     </tr>
     <tr>
       <td>1.9</td>
-      <td>0.0.6</td>
+      <td>0.1.0</td>
+    </tr>
+    <tr>
+      <td>1.10</td>
+      <td>0.2.0</td>
     </tr>
   </tbody>
 </table>
