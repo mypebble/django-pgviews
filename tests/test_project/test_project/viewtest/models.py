@@ -46,6 +46,10 @@ class DependantMaterializedView(django_pgviews.ReadOnlyMaterializedView):
     dependencies = ('viewtest.MaterializedRelatedView',)
     sql = """SELECT model_id from viewtest_materializedrelatedview;"""
 
+class MaterializedRelatedViewWithIndex(django_pgviews.ReadOnlyMaterializedView):
+    concurrent_index = 'id'
+    sql = """SELECT id AS model_id, id FROM viewtest_testmodel"""
+    model = models.ForeignKey(TestModel)
 
 class CustomSchemaView(django_pgviews.ReadOnlyView):
     sql = """SELECT id AS model_id, id FROM viewtest_testmodel"""

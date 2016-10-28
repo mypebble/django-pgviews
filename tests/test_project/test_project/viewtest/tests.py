@@ -35,7 +35,7 @@ class ViewTestCase(TestCase):
                         WHERE matviewname LIKE 'viewtest_%';''')
 
             count, = cur.fetchone()
-            self.assertEqual(count, 2)
+            self.assertEqual(count, 3)
 
             cur.execute('''SELECT COUNT(*) FROM information_schema.views
                         WHERE table_schema = 'test_schema';''')
@@ -112,6 +112,11 @@ class ViewTestCase(TestCase):
 
         self.assertEqual(models.MaterializedRelatedView.objects.count(), 1,
             'Materialized view should have updated')
+
+        models.MaterializedRelatedViewWithIndex.refresh(concurrently=True)
+
+        self.assertEqual(models.MaterializedRelatedViewWithIndex.objects.count(), 1,
+            'Materialized view should have updated concurrently')
 
 
 class DependantViewTestCase(TestCase):
