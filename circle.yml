@@ -2,7 +2,7 @@ dependencies:
   override:
     - pip install tox tox-pyenv
   post:
-    - pyenv global 2.7.10 3.4.3 3.5.0
+    - pyenv global 2.7.12 3.4.4 3.5.2
   pre:
     - sudo apt-get install python3-dev -y
 notify:

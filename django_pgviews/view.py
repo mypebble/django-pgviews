@@ -65,7 +65,7 @@ models.signals.class_prepared.connect(realize_deferred_projections)
 
 
 def create_view(connection, view_name, view_query, update=True, force=False,
-        materialized=False):
+        materialized=False, index=None):
     """
     Create a named view on a connection.
 
@@ -110,6 +110,8 @@ def create_view(connection, view_name, view_query, update=True, force=False,
         if materialized:
             cursor.execute('DROP MATERIALIZED VIEW IF EXISTS {0} CASCADE;'.format(view_name))
             cursor.execute('CREATE MATERIALIZED VIEW {0} AS {1};'.format(view_name, view_query))
+            if index is not None:
+                cursor.execute('CREATE UNIQUE INDEX {0}_{1}_index ON {0} ({1})'.format(view_name, index))
             ret = view_exists and 'UPDATED' or 'CREATED'
         elif not force_required:
             cursor.execute('CREATE OR REPLACE VIEW {0} AS {1};'.format(view_name, view_query))
@@ -149,6 +151,7 @@ class ViewMeta(models.base.ModelBase):
         # Get attributes before Django
         dependencies = attrs.pop('dependencies', [])
         projection = attrs.pop('projection', [])
+        concurrent_index = attrs.pop('concurrent_index',None)
 
         # Get projection
         deferred_projections = []
@@ -169,6 +172,8 @@ class ViewMeta(models.base.ModelBase):
 
         # Get dependencies
         setattr(view_cls, '_dependencies', dependencies)
+        # Materialized views can have an index allowing concurrent refresh
+        setattr(view_cls, '_concurrent_index', concurrent_index)
         for app_label, model_name, field_name in deferred_projections:
             model_spec = (app_label, model_name.lower())
 
@@ -258,12 +263,16 @@ class MaterializedView(View):
     http://www.postgresql.org/docs/current/static/sql-creatematerializedview.html
     """
     @classmethod
-    def refresh(self):
+    def refresh(self, concurrently=False):
         cursor_wrapper = connection.cursor()
         cursor = cursor_wrapper.cursor
         try:
-            cursor.execute('REFRESH MATERIALIZED VIEW {0}'.format(
-                self._meta.db_table))
+            if self._concurrent_index is not None and concurrently:
+                cursor.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY {0}'.format(
+                    self._meta.db_table))
+            else:
+                cursor.execute('REFRESH MATERIALIZED VIEW {0}'.format(
+                    self._meta.db_table))
         finally:
             cursor_wrapper.close()
 

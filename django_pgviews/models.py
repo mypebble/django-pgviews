@@ -49,7 +49,8 @@ class ViewSyncer(object):
             try:
                 status = create_view(connection, view_cls._meta.db_table,
                         view_cls.sql, update=update, force=force,
-                        materialized=isinstance(view_cls(), MaterializedView))
+                        materialized=isinstance(view_cls(), MaterializedView),
+                        index=view_cls._concurrent_index)
                 self.synced.append(name)
             except Exception as exc:
                 exc.view_cls = view_cls

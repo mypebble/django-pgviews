@@ -167,6 +167,35 @@ Example:
     def customer_saved(sender, action=None, instance=None, **kwargs):
         PreferredCustomer.refresh()
 
+Postgres 9.4 and up allow materialized views to be refreshed concurrently, without blocking reads, as long as a
+unique index exists on the materialized view. To enable concurrent refresh, specify the name of a column that can be
+used as a unique index on the materialized view. Once enabled, passing ``concurrently=True`` to the model's refresh
+method will result in postgres performing the refresh concurrently. (Note that the refresh method itself blocks until
+the refresh is complete; concurrent refresh is most useful when materialized views are updated in
+another process or thread.)
+
+Example:
+
+.. code:: python
+    from django_pgviews import view as pg
+
+
+    VIEW_SQL = """
+        SELECT id, name, post_code FROM myapp_customer WHERE is_preferred = TRUE
+    """
+
+    class PreferredCustomer(pg.MaterializedView):
+        concurrent_index = 'id'
+        sql = VIEW_SQL
+
+        name = models.CharField(max_length=100)
+        post_code = models.CharField(max_length=20)
+
+
+    @receiver(post_save, sender=Customer)
+    def customer_saved(sender, action=None, instance=None, **kwargs):
+        PreferredCustomer.refresh(concurrently=True)
+
 Custom Schema
 ~~~~~~~~~~~~~
 
