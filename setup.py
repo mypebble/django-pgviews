@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 LONG_DESCRIPTION = ''
 try:
-    LONG_DESCRIPTION = open('README.txt').read()
+    LONG_DESCRIPTION = open('README.rst').read()
 except:
     pass
 
