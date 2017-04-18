@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function, unicode_literals
+
 from setuptools import setup, find_packages
 
 LONG_DESCRIPTION = ''
@@ -8,7 +10,7 @@ except:
 
 setup(
     name='django-pgviews',
-    version='0.3.0',
+    version='0.3.1',
     description="Create and manage Postgres SQL Views in Django",
     long_description=LONG_DESCRIPTION,
     author='Scott Walton',

@@ -2,6 +2,7 @@
 
 # Virtualenvs for testing
 .venv
+venv/
 
 # Temporary testing directories
 test__*
@@ -40,6 +41,7 @@ pip-log.txt
 
 # Compiled
 *.pyc
+README.rst
 
 # Temporary files
 *~
@@ -47,3 +49,4 @@ pip-log.txt
 
 .idea
 pip-selfcheck.json
+tags
