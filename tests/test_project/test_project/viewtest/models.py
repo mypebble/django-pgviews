@@ -29,12 +29,12 @@ class SimpleUser(django_pgviews.View):
 
 class RelatedView(django_pgviews.ReadOnlyView):
     sql = """SELECT id AS model_id, id FROM viewtest_testmodel"""
-    model = models.ForeignKey(TestModel)
+    model = models.ForeignKey(TestModel, on_delete=models.DO_NOTHING)
 
 
 class MaterializedRelatedView(django_pgviews.ReadOnlyMaterializedView):
     sql = """SELECT id AS model_id, id FROM viewtest_testmodel"""
-    model = models.ForeignKey(TestModel)
+    model = models.ForeignKey(TestModel, on_delete=models.DO_NOTHING)
 
 
 class DependantView(django_pgviews.ReadOnlyView):
@@ -49,11 +49,11 @@ class DependantMaterializedView(django_pgviews.ReadOnlyMaterializedView):
 class MaterializedRelatedViewWithIndex(django_pgviews.ReadOnlyMaterializedView):
     concurrent_index = 'id'
     sql = """SELECT id AS model_id, id FROM viewtest_testmodel"""
-    model = models.ForeignKey(TestModel)
+    model = models.ForeignKey(TestModel, on_delete=models.DO_NOTHING)
 
 class CustomSchemaView(django_pgviews.ReadOnlyView):
     sql = """SELECT id AS model_id, id FROM viewtest_testmodel"""
-    model = models.ForeignKey(TestModel)
+    model = models.ForeignKey(TestModel, on_delete=models.DO_NOTHING)
 
     class Meta:
         managed = False
