@@ -6,6 +6,7 @@ from django.db import connection
 from django.db.models import signals
 from django.dispatch import receiver
 from django.test import TestCase
+from django_pgviews.signals import view_synced, all_views_synced
 
 from . import models
 
@@ -117,6 +118,23 @@ class ViewTestCase(TestCase):
 
         self.assertEqual(models.MaterializedRelatedViewWithIndex.objects.count(), 1,
             'Materialized view should have updated concurrently')
+
+    def test_signals(self):
+        synced_views = []
+        all_views_were_synced = [False]
+
+        @receiver(view_synced)
+        def on_view_synced(sender, has_changed, **kwargs):
+            synced_views.append(sender)
+
+        @receiver(all_views_synced)
+        def on_all_views_synced(sender, **kwargs):
+            all_views_were_synced[0] = True
+
+        call_command('sync_pgviews')
+
+        self.assertEqual(len(synced_views), 8)  # All views went through syncing
+        self.assertEqual(all_views_were_synced[0], True)
 
 
 class DependantViewTestCase(TestCase):

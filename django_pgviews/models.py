@@ -4,6 +4,7 @@ from django.apps import apps
 from django.db import connection
 
 from django_pgviews.view import create_view, View, MaterializedView
+from django_pgviews.signals import view_synced, all_views_synced
 
 log = logging.getLogger('django_pgviews.sync_pgviews')
 
@@ -25,6 +26,8 @@ class ViewSyncer(object):
 
         if loop >= 10:
             log.warn('pgviews dependencies hit limit. Check if your model dependencies are correct')
+        else:
+            all_views_synced.send(sender=None)
 
     def run_backlog(self, models, force, update):
         '''Installs the list of models given from the previous backlog
@@ -51,6 +54,9 @@ class ViewSyncer(object):
                         view_cls.sql, update=update, force=force,
                         materialized=isinstance(view_cls(), MaterializedView),
                         index=view_cls._concurrent_index)
+                view_synced.send(
+                    sender=view_cls, update=update, force=force, status=status,
+                    has_changed=status not in ('EXISTS', 'FORCE_REQUIRED'))
                 self.synced.append(name)
             except Exception as exc:
                 exc.view_cls = view_cls
