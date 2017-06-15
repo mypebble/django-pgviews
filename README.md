@@ -203,6 +203,30 @@ class PreferredCustomer(pg.View):
       managed = False
 ```
 
+### Sync Listeners
+
+django-pgviews 0.5.0 adds the ability to listen to when a `post_sync` event has
+occurred.
+
+#### `view_synced`
+
+Fired every time a VIEW is synchronised with the database.
+
+Provides args:
+* `sender` - View Class
+* `update` - Whether the view to be updated
+* `force` - Whether `force` was passed
+* `status` - The result of creating the view e.g. `EXISTS`, `FORCE_REQUIRED`
+* `has_changed` - Whether the view had to change
+
+#### `all_views_synced`
+
+Sent after all Postgres VIEWs are synchronised.
+
+Provides args:
+* `sender` - Always `None`
+
+
 ## Django Compatibility
 
 <table>
