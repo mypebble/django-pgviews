@@ -125,8 +125,7 @@ from django_pgviews import view as pg
 
 
 class PreferredCustomer(pg.View):
-    name = models.CharField(max_length=100)
-    post_code = models.CharField(max_length=20)
+    projection = ['myapp.Customer.*',]
     sql = """SELECT * FROM myapp_customer WHERE is_preferred = TRUE;"""
 
     class Meta:
