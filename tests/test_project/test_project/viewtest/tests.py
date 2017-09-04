@@ -1,3 +1,5 @@
+"""Test Django PGViews.
+"""
 from contextlib import closing
 
 from django.contrib import auth
@@ -13,9 +15,9 @@ from . import models
 
 @receiver(signals.post_migrate)
 def create_test_schema(sender, app_config, **kwargs):
-        command = 'CREATE SCHEMA IF NOT EXISTS {};'.format('test_schema')
-        with connection.cursor() as cursor:
-            cursor.execute(command)
+    command = 'CREATE SCHEMA IF NOT EXISTS {};'.format('test_schema')
+    with connection.cursor() as cursor:
+        cursor.execute(command)
 
 
 class ViewTestCase(TestCase):
@@ -91,32 +93,33 @@ class ViewTestCase(TestCase):
     def test_related_delete(self):
         """Test views do not interfere with deleting the models
         """
-        tm = models.TestModel()
-        tm.name = "Bob"
-        tm.save()
-        tm.delete()
+        test_model = models.TestModel()
+        test_model.name = "Bob"
+        test_model.save()
+        test_model.delete()
 
     def test_materialized_view(self):
         """Test a materialized view works correctly
         """
         self.assertEqual(models.MaterializedRelatedView.objects.count(), 0,
-            'Materialized view should not have anything')
+                         'Materialized view should not have anything')
 
-        tm = models.TestModel()
-        tm.name = "Bob"
-        tm.save()
+        test_model = models.TestModel()
+        test_model.name = "Bob"
+        test_model.save()
 
         self.assertEqual(models.MaterializedRelatedView.objects.count(), 0,
-            'Materialized view should not have anything')
+                         'Materialized view should not have anything')
 
         models.MaterializedRelatedView.refresh()
 
         self.assertEqual(models.MaterializedRelatedView.objects.count(), 1,
-            'Materialized view should have updated')
+                         'Materialized view should have updated')
 
         models.MaterializedRelatedViewWithIndex.refresh(concurrently=True)
 
-        self.assertEqual(models.MaterializedRelatedViewWithIndex.objects.count(), 1,
+        self.assertEqual(
+            models.MaterializedRelatedViewWithIndex.objects.count(), 1,
             'Materialized view should have updated concurrently')
 
     def test_signals(self):
@@ -149,7 +152,8 @@ class ViewTestCase(TestCase):
 
         call_command('sync_pgviews', update=False)
 
-        self.assertEqual(len(synced_views), 8)  # All views went through syncing
+        # All views went through syncing
+        self.assertEqual(len(synced_views), 8)
         self.assertEqual(all_views_were_synced[0], True)
         self.assertFalse(expected)
 
@@ -167,8 +171,9 @@ class DependantViewTestCase(TestCase):
         with closing(connection.cursor()) as cur:
             cur.execute("DROP VIEW viewtest_relatedview CASCADE;")
 
-            cur.execute("""CREATE VIEW viewtest_relatedview as
-                        SELECT id AS model_id, name FROM viewtest_testmodel;""")
+            cur.execute(
+                """CREATE VIEW viewtest_relatedview as
+                SELECT id AS model_id, name FROM viewtest_testmodel;""")
 
             cur.execute("""CREATE VIEW viewtest_dependantview as
                         SELECT name from viewtest_relatedview;""")
@@ -192,19 +197,24 @@ class DependantViewTestCase(TestCase):
                 cur.execute("""SELECT name from viewtest_dependantview;""")
 
     def test_sync_depending_materialized_views(self):
-        """Test the sync_pgviews command for views that depend on other materialized views."""
-
+        """Refresh views that depend on materialized views.
+        """
         with closing(connection.cursor()) as cur:
-            cur.execute("DROP MATERIALIZED VIEW viewtest_materializedrelatedview CASCADE;")
+            cur.execute(
+                """DROP MATERIALIZED VIEW viewtest_materializedrelatedview
+                CASCADE;""")
 
-            cur.execute("""CREATE MATERIALIZED VIEW viewtest_materializedrelatedview as
-                        SELECT id AS model_id, name FROM viewtest_testmodel;""")
+            cur.execute(
+                """CREATE MATERIALIZED VIEW viewtest_materializedrelatedview as
+                SELECT id AS model_id, name FROM viewtest_testmodel;""")
 
-            cur.execute("""CREATE MATERIALIZED VIEW viewtest_dependantmaterializedview as
-                        SELECT name from viewtest_materializedrelatedview;""")
-
-            cur.execute("""SELECT name from viewtest_materializedrelatedview;""")
-            cur.execute("""SELECT name from viewtest_dependantmaterializedview;""")
+            cur.execute(
+                """CREATE MATERIALIZED VIEW viewtest_dependantmaterializedview
+                as SELECT name from viewtest_materializedrelatedview;""")
+            cur.execute(
+                """SELECT name from viewtest_materializedrelatedview;""")
+            cur.execute(
+                """SELECT name from viewtest_dependantmaterializedview;""")
 
         call_command('sync_pgviews', '--force')
 
@@ -216,7 +226,13 @@ class DependantViewTestCase(TestCase):
             self.assertEqual(count, 4)
 
             with self.assertRaises(Exception):
-                cur.execute("""SELECT name from viewtest_materializedrelatedview;""")
+                cur.execute(
+                    """SELECT name from
+                    viewtest_dependantmaterializedview;""")
+                cur.execute(
+                    """SELECT name from viewtest_materializedrelatedview; """)
 
             with self.assertRaises(Exception):
-                cur.execute("""SELECT name from viewtest_dependantmaterializedview;""")
+                cur.execute(
+                    """SELECT name from
+                    viewtest_dependantmaterializedview;""")
