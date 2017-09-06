@@ -330,6 +330,16 @@ yet loaded by Django.
 
 You now have to use the `.view` module directly.
 
+### Django 1.10 Note
+
+When updating to Django 1.10, if you see `AttributeError: can't set attribute`
+when you try to migrate or run tests, you need to check your migrations for
+where `_base_manager` or `_default_manager` get set on the model and replace it
+with `objects` inside the migration.
+
+This also applies to [Django MPTT](https://django-mptt.github.io/django-mptt/upgrade.html#id1)
+who have covered this in a bit more detail.
+
 ## Python 3 Support
 
 Django PGViews supports Python 3 in versions 0.0.7 and above.
