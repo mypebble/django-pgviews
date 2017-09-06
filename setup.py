@@ -2,11 +2,12 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from setuptools import setup, find_packages
 
-LONG_DESCRIPTION = ''
 try:
-    LONG_DESCRIPTION = open('README.rst').read()
-except:
-    pass
+    import pypandoc
+    LONG_DESCRIPTION = pypandoc.convert('README.md', 'rst')
+except(IOError, ImportError):
+    LONG_DESCRIPTION = open('README.md').read()
+
 
 setup(
     name='django-pgviews',
