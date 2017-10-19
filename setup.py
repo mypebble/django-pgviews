@@ -10,11 +10,13 @@ try:
 except (IOError, ImportError):
     if isfile('README.md'):
         LONG_DESCRIPTION = open('README.md').read()
+    else:
+        LONG_DESCRIPTION = ''
 
 
 setup(
     name='django-pgviews',
-    version='0.5.2',
+    version='0.5.3',
     description="Create and manage Postgres SQL Views in Django",
     long_description=LONG_DESCRIPTION,
     author='Scott Walton',
