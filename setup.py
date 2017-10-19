@@ -1,17 +1,20 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
+from os.path import isfile
+
 from setuptools import setup, find_packages
 
 try:
     import pypandoc
     LONG_DESCRIPTION = pypandoc.convert('README.md', 'rst')
-except(IOError, ImportError):
-    LONG_DESCRIPTION = open('README.md').read()
+except (IOError, ImportError):
+    if isfile('README.md'):
+        LONG_DESCRIPTION = open('README.md').read()
 
 
 setup(
     name='django-pgviews',
-    version='0.5.1',
+    version='0.5.2',
     description="Create and manage Postgres SQL Views in Django",
     long_description=LONG_DESCRIPTION,
     author='Scott Walton',
@@ -27,5 +30,6 @@ setup(
         'Framework :: Django',
         'Framework :: Django :: 1.9',
         'Framework :: Django :: 1.10',
+        'Framework :: Django :: 1.11',
     ]
 )
