@@ -214,10 +214,10 @@ def customer_saved(sender, action=None, instance=None, **kwargs):
 
 Postgres 9.4 and up allow materialized views to be refreshed concurrently, without blocking reads, as long as a
 unique index exists on the materialized view. To enable concurrent refresh, specify the name of a column that can be
-used as a unique index on the materialized view. Once enabled, passing `concurrently=True` to the model's refresh
-method will result in postgres performing the refresh concurrently. (Note that the refresh method itself blocks until
-the refresh is complete; concurrent refresh is most useful when materialized views are updated in
-another process or thread.)
+used as a unique index on the materialized view. Unique index can be defined on more than one column of a materialized 
+view. Once enabled, passing `concurrently=True` to the model's refresh method will result in postgres performing the 
+refresh concurrently. (Note that the refresh method itself blocks until the refresh is complete; concurrent refresh is 
+most useful when materialized views are updated in another process or thread.)
 
 Example:
 
@@ -230,7 +230,7 @@ VIEW_SQL = """
 """
 
 class PreferredCustomer(pg.MaterializedView):
-    concurrent_index = 'id'
+    concurrent_index = 'id, post_code'
     sql = VIEW_SQL
 
     name = models.CharField(max_length=100)
