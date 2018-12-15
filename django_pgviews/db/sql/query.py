@@ -1,6 +1,5 @@
 from django.db import connections
 from django.db.models.sql import query
-
 from django_pgviews.db.sql import compiler
 
 

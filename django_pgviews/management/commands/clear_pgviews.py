@@ -1,11 +1,9 @@
 import logging
 
-from django.core.management.base import BaseCommand
 from django.apps import apps
+from django.core.management.base import BaseCommand
 from django.db import connections, router
-
-from django_pgviews.view import clear_view, View, MaterializedView
-
+from django_pgviews.view import MaterializedView, View, clear_view
 
 log = logging.getLogger('django_pgviews.sync_pgviews')
 

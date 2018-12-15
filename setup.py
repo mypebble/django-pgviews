@@ -2,7 +2,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from os.path import isfile
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 try:
     import pypandoc

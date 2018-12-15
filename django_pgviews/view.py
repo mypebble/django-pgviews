@@ -6,16 +6,13 @@ import logging
 import re
 
 import django
-from django.core import exceptions
-from django.db import connections, router
-from django.db.models.query import QuerySet
-from django.db import models
-from django.utils import six
-from django.apps import apps
 import psycopg2
-
+from django.apps import apps
+from django.core import exceptions
+from django.db import connections, models, router
+from django.db.models.query import QuerySet
+from django.utils import six
 from django_pgviews.db import get_fields_by_name
-
 
 FIELD_SPEC_REGEX = (r'^([A-Za-z_][A-Za-z0-9_]*)\.'
                     r'([A-Za-z_][A-Za-z0-9_]*)\.'

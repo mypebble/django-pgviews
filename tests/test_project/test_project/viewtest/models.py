@@ -1,5 +1,4 @@
 from django.db import models
-
 from django_pgviews import view
 
 
