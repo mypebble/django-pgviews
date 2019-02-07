@@ -1,11 +1,9 @@
 import logging
 
-from django.core.management.base import BaseCommand
 from django.apps import apps
-from django.db import connection
-
-from django_pgviews.view import clear_view, View, MaterializedView
-
+from django.core.management.base import BaseCommand
+from django.db import connections, router
+from django_pgviews.view import MaterializedView, View, clear_view
 
 log = logging.getLogger('django_pgviews.sync_pgviews')
 
@@ -22,6 +20,8 @@ class Command(BaseCommand):
                     hasattr(view_cls, 'sql')):
                 continue
             python_name = '{}.{}'.format(view_cls._meta.app_label, view_cls.__name__)
+            using = router.db_for_write(view_cls)
+            connection = connections[using]
             status = clear_view(
                 connection, view_cls._meta.db_table,
                 materialized=isinstance(view_cls(), MaterializedView))

@@ -8,9 +8,7 @@ from django.db import connection
 from django.db.models import signals
 from django.dispatch import receiver
 from django.test import TestCase
-from django_pgviews.signals import view_synced, all_views_synced
-
-from . import models
+from django_pgviews.signals import all_views_synced, view_synced
 
 
 @receiver(signals.post_migrate)

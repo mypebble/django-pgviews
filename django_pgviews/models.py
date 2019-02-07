@@ -1,13 +1,11 @@
 import logging
 
 from django.apps import apps
-from django.db import connection
-
-from django_pgviews.view import create_view, View, MaterializedView
-from django_pgviews.signals import view_synced, all_views_synced
+from django.db import connections, router
+from django_pgviews.signals import all_views_synced, view_synced
+from django_pgviews.view import MaterializedView, View, create_view
 
 log = logging.getLogger('django_pgviews.sync_pgviews')
-
 
 class ViewSyncer(object):
     def run(self, force, update, **options):
@@ -50,7 +48,9 @@ class ViewSyncer(object):
                 continue # Skip
 
             try:
-                status = create_view(connection, view_cls._meta.db_table,
+                using = router.db_for_write(view_cls)
+                _connection = connections[using]
+                status = create_view(_connection, view_cls._meta.db_table,
                         view_cls.sql, update=update, force=force,
                         materialized=isinstance(view_cls(), MaterializedView),
                         index=view_cls._concurrent_index)

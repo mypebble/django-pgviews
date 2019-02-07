@@ -6,17 +6,15 @@ import logging
 import re
 
 import django
-from django.core import exceptions
-from django.db import connection
-from django.db.models.query import QuerySet
-from django.db import models
-from django.utils import six
-from django.apps import apps
 import psycopg2
-
+from django.apps import apps
+from django.core import exceptions
+from django.db import connections, models, router
+from django.db.models.query import QuerySet
+from django.utils import six
 from django_pgviews.db import get_fields_by_name
-
-
+import django.db.models.options as options
+options.DEFAULT_NAMES = options.DEFAULT_NAMES + ('using',)
 FIELD_SPEC_REGEX = (r'^([A-Za-z_][A-Za-z0-9_]*)\.'
                     r'([A-Za-z_][A-Za-z0-9_]*)\.'
                     r'(\*|(?:[A-Za-z_][A-Za-z0-9_]*))$')
@@ -266,6 +264,9 @@ class MaterializedView(View):
     """
     @classmethod
     def refresh(self, concurrently=False):
+        using = router.db_for_write(self)
+        connection = connections[using]
+
         cursor_wrapper = connection.cursor()
         cursor = cursor_wrapper.cursor
         try:
