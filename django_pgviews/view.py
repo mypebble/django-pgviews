@@ -7,7 +7,7 @@ import re
 
 import django
 from django.core import exceptions
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models.query import QuerySet
 from django.db import models
 from django.utils import six
@@ -64,6 +64,7 @@ def realize_deferred_projections(sender, *args, **kwargs):
 models.signals.class_prepared.connect(realize_deferred_projections)
 
 
+@transaction.atomic()
 def create_view(connection, view_name, view_query, update=True, force=False,
         materialized=False, index=None):
     """
