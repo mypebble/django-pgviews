@@ -101,10 +101,10 @@ def create_view(connection, view_name, view_query, update=True, force=False,
             # update this copy, and detecting errors.
             cursor.execute('CREATE TEMPORARY VIEW check_conflict AS SELECT * FROM {0};'.format(view_name))
             try:
-                cursor.execute('CREATE OR REPLACE TEMPORARY VIEW check_conflict AS {0};'.format(view_query))
+                with transaction.atomic():
+                    cursor.execute('CREATE OR REPLACE TEMPORARY VIEW check_conflict AS {0};'.format(view_query))
             except psycopg2.ProgrammingError:
                 force_required = True
-                cursor.connection.rollback()
             finally:
                 cursor.execute('DROP VIEW IF EXISTS check_conflict;')
 
