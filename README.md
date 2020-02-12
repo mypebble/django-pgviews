@@ -317,6 +317,10 @@ Provides args:
       <td>1.10</td>
       <td>0.2.0</td>
     </tr>
+    <tr>
+      <td>2.2</td>
+      <td>0.5.5</td>
+    </tr>
   </tbody>
 </table>
 
