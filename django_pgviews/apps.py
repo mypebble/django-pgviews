@@ -14,7 +14,7 @@ class ViewConfig(apps.AppConfig):
     name = 'django_pgviews'
     verbose_name = 'Django Postgres Views'
 
-    def sync_pgviews(self, sender, app_config, **kwargs):
+    def sync_pgviews(self, sender, app_config, using, **kwargs):
         """Forcibly sync the views.
         """
         self.counter = self.counter + 1
@@ -26,7 +26,7 @@ class ViewConfig(apps.AppConfig):
             # (models in app init are not allowed)
             from .models import ViewSyncer
             vs = ViewSyncer()
-            vs.run(force=True, update=True) 
+            vs.run(force=True, update=True, using=using)
 
     def ready(self):
         """Find and setup the apps to set the post_migrate hooks for.

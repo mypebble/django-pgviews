@@ -2,8 +2,7 @@ from optparse import make_option
 import logging
 
 from django.core.management.base import BaseCommand
-from django.db import connection
-from django.apps import apps
+from django.db import DEFAULT_DB_ALIAS
 
 from django_pgviews.models import ViewSyncer
 
@@ -26,7 +25,12 @@ class Command(BaseCommand):
             default=False,
             help="""Force replacement of pre-existing views where
             breaking changes have been made to the schema.""")
+        parser.add_argument(
+            '--database',
+            default=DEFAULT_DB_ALIAS,
+            help='Nominates a database to synchronize. Defaults to the "default" database.',
+        )
 
-    def handle(self, force, update, **options):
+    def handle(self, force, update, database, **options):
         vs = ViewSyncer()
-        vs.run(force, update)
+        vs.run(force, update, using=database)
