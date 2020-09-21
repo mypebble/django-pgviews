@@ -10,7 +10,7 @@ from django.core import exceptions
 from django.db import connection, transaction
 from django.db.models.query import QuerySet
 from django.db import models
-from django.utils import six
+import six
 from django.apps import apps
 import psycopg2
 
@@ -37,7 +37,7 @@ def hasfield(model_cls, field_name):
     try:
         model_cls._meta.get_field(field_name)
         return True
-    except models.FieldDoesNotExist:
+    except exceptions.FieldDoesNotExist:
         return False
 
 

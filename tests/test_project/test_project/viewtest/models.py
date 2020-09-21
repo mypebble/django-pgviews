@@ -29,7 +29,7 @@ class SimpleUser(view.View):
 
 class RelatedView(view.ReadOnlyView):
     sql = """SELECT id AS model_id, id FROM viewtest_testmodel"""
-    model = models.ForeignKey(TestModel)
+    model = models.ForeignKey(TestModel, on_delete=models.CASCADE)
 
 
 class MaterializedRelatedView(view.ReadOnlyMaterializedView):
