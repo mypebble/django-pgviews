@@ -16,7 +16,7 @@ except (IOError, ImportError):
 
 setup(
     name='django-pgviews',
-    version='0.5.8',
+    version='0.6.0',
     description="Create and manage Postgres SQL Views in Django",
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
@@ -28,12 +28,15 @@ setup(
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Framework :: Django',
-        'Framework :: Django :: 1.9',
-        'Framework :: Django :: 1.10',
-        'Framework :: Django :: 1.11',
+        'Framework :: Django :: 4.0',
+        'Framework :: Django :: 4.1',
+        'Framework :: Django :: 4.2',
     ],
     install_requires=['six']
 )
