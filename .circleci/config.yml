@@ -1,34 +1,15 @@
 version: 2
+
 jobs:
   build:
-    docker:
-      - image: themattrix/tox
-        environment:
-          DATABASE_URL: postgresql://root@localhost/circle_test?sslmode=disable
-          DB_USER: root
-          DB_NAME: circle_test
+      docker:
+        - image: 31z4/tox
+          environment:
+            TEST_DATABASE_URL: postgresql://postgres@localhost/circle_test
+        - image: cimg/postgres:13.8
+          environment:
+            POSTGRES_USER: postgres
 
-      - image: circleci/python:3.8
-      - image: circleci/postgres:9.6-alpine
-        environment:
-          POSTGRES_USER: ubuntu
-          POSTGRES_DB: circle_test
-      - image: redis
-
-    steps:
-      - run:
-          name: Install Dependencies
-          command: |
-            apt-get update
-            apt-get install -y libpq-dev
-
-      - run:
-          name: Install Git and SSH Client
-          command: apt-get install -y ssh git
-
-      - checkout
-
-      - run:
-          name: Run Tox
-          command: |
-            tox
+      steps:
+        - checkout
+        - run: tox

@@ -347,3 +347,7 @@ Django PGViews supports Python 3 in versions 0.0.7 and above.
 ## Django 3.0 Note
 
 Changed `from django.utils import six` to `import six` in the `views.py` file, and added `six` as a dependency module due to the module being removed from Django.
+
+## Django 4.0 Note
+
+Removed `default_app_config`.

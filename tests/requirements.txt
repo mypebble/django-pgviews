@@ -1,4 +1,4 @@
-psycopg2
+psycopg2-binary
 six
 django
 django-pgviews
