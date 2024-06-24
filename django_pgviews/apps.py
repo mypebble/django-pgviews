@@ -2,6 +2,7 @@ import logging
 
 from django import apps
 from django.db.models import signals
+from django.conf import settings
 
 log = logging.getLogger('django_pgviews.sync_pgviews')
 
@@ -31,4 +32,5 @@ class ViewConfig(apps.AppConfig):
     def ready(self):
         """Find and setup the apps to set the post_migrate hooks for.
         """
-        signals.post_migrate.connect(self.sync_pgviews)
+        if not getattr(settings, 'PGVIEWS_DISABLE_AUTO_SYNC', False):
+            signals.post_migrate.connect(self.sync_pgviews)
