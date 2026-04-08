@@ -6,7 +6,7 @@ jobs:
         - image: 31z4/tox
           environment:
             TEST_DATABASE_URL: postgresql://postgres@localhost/circle_test
-        - image: cimg/postgres:13.8
+        - image: cimg/postgres:17.7
           environment:
             POSTGRES_USER: postgres
 
